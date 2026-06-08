@@ -117,19 +117,6 @@
                 Erro ao carregar os números. Tente novamente mais tarde.
             </div>
             <div id="numbersGrid" class="numbers-grid">
-                <!-- Os números serão carregados aqui via JavaScript -->
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <p>Paróquia Santa Terezinha</p>
-            <p class="footer-small">Romaria dos Jovens ao Santuário de Nossa Senhora Aparecida</p>
-        </div>
-    </footer>
-
-    <!-- Modal de Informações -->
     <div id="infoModal" class="modal">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
@@ -168,50 +155,3 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Venda -->
-    <div id="confirmationModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeConfirmationModal()">&times;</span>
-            <h2 class="modal-title">✅ Venda Registrada!</h2>
-            <div class="modal-body">
-                <div class="confirmation-message">
-                    <p>A venda foi registrada com sucesso na planilha!</p>
-                </div>
-                <div class="info-group">
-                    <span class="info-label">Números Vendidos:</span>
-                    <span class="info-value" id="confirmedNumbers"></span>
-                </div>
-                <div class="info-group">
-                    <span class="info-label">Comprador:</span>
-                    <span class="info-value" id="confirmedBuyer"></span>
-                </div>
-                <div class="info-group">
-                    <span class="info-label">Vendedor:</span>
-                    <span class="info-value" id="confirmedSeller"></span>
-                </div>
-                <div class="info-group">
-                    <span class="info-label">Valor Total:</span>
-                    <span class="info-value" id="confirmedTotal"></span>
-                </div>
-                <div class="payment-instructions">
-                    <h3>Instruções para o Comprador:</h3>
-                    <ol>
-                        <li>Solicite o pagamento via PIX usando a chave abaixo</li>
-                        <li>Peça o comprovante de pagamento</li>
-                        <li>Confirme o recebimento</li>
-                    </ol>
-                    <div class="pix-container">
-                        <input type="text" id="modalPixKey" value="artursantana123@gmail.com" readonly>
-                        <button onclick="copyPixKey()" class="copy-btn">
-                            <span class="copy-text">Copiar PIX</span>
-                        </button>
-                    </div>
-                </div>
-                <button onclick="closeConfirmationModal()" class="reserve-btn">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>

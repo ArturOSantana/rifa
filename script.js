@@ -1,23 +1,15 @@
-// Configuração do Google Sheets
-// Usando o ID original da planilha (não o ID publicado)
 const SHEET_ID = '1QL9hka6P8SG_2un3JAsQWgs8mu7E44K3SXZOhTjF69k';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Página1`;
-
-// URL do Google Apps Script para salvar reservas
-// IMPORTANTE: Substitua pela URL do seu Apps Script após implantação
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfbEVwGlJEF7yY7NA8kuChbE7qE-e60yUiqdPWjnUSr1AbYruggJ1mSAO1J8ZWZpJL/exec';
 
-// Configuração da meta e preços
-const GOAL_AMOUNT = 1000; // Meta em reais
-const PRICE_PER_NUMBER = 5; // Preço por número: R$ 5,00
-const PROMO_PRICE = 10; // Promoção: 3 números por R$ 10,00
+const GOAL_AMOUNT = 1000;
+const PRICE_PER_NUMBER = 5;
+const PROMO_PRICE = 10;
 const PROMO_QUANTITY = 3;
 
-// Estado da aplicação
 let allNumbers = [];
 let currentFilter = 'all';
 
-// Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });
@@ -31,7 +23,6 @@ function initializeApp() {
 }
 
 function setupEventListeners() {
-    // Botões de filtro
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -42,7 +33,6 @@ function setupEventListeners() {
         });
     });
 
-    // Busca de número específico
     const searchBtn = document.getElementById('searchBtn');
     const searchInput = document.getElementById('searchNumber');
     
@@ -53,12 +43,10 @@ function setupEventListeners() {
         }
     });
 
-    // Permitir apenas números no campo de busca
     searchInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/[^0-9]/g, '');
     });
 
-    // Botão copiar PIX
     const copyPixBtn = document.getElementById('copyPixBtn');
     if (copyPixBtn) {
         copyPixBtn.addEventListener('click', copyPixKey);
@@ -78,7 +66,6 @@ async function loadNumbersFromSheet() {
         console.log('Carregando dados do Google Sheets...');
         console.log('URL:', SHEET_URL);
 
-        // Fazer requisição ao Google Sheets (formato JSON via gviz)
         const response = await fetch(SHEET_URL);
         
         if (!response.ok) {
@@ -88,7 +75,6 @@ async function loadNumbersFromSheet() {
         const text = await response.text();
         console.log('Resposta recebida, tamanho:', text.length);
         
-        // Remover o prefixo do Google Visualization API
         const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
         
         if (!match) {
@@ -119,7 +105,6 @@ async function loadNumbersFromSheet() {
         `;
         loadingMessage.style.display = 'none';
         
-        // Em caso de erro, carregar dados de exemplo
         setTimeout(() => {
             errorMessage.style.display = 'none';
             loadExampleData();
@@ -133,7 +118,6 @@ function processGoogleSheetsData(data) {
     console.log('Processando dados do Google Sheets...');
     
     if (data.table && data.table.rows && data.table.rows.length > 0) {
-        // Processar cada linha
         data.table.rows.forEach(row => {
             if (row.c && row.c[0] && row.c[0].v) {
                 const numero = row.c[0].v;
@@ -157,7 +141,6 @@ function processGoogleSheetsData(data) {
     
     console.log('Números processados:', allNumbers.length);
     
-    // Se não houver dados, criar números de 001 a 300
     if (allNumbers.length === 0) {
         for (let i = 1; i <= 300; i++) {
             allNumbers.push({
@@ -177,16 +160,13 @@ function processGoogleSheetsData(data) {
 
 
 function loadExampleData() {
-    // Criar números de 001 a 300 com alguns vendidos aleatoriamente
     allNumbers = [];
     const soldNumbers = new Set();
     
-    // Nomes de exemplo
     const buyerNames = ['João Silva', 'Maria Santos', 'Pedro Oliveira', 'Ana Costa', 'Carlos Souza', 'Juliana Lima', 'Roberto Alves', 'Fernanda Rocha'];
     const sellerNames = ['Paulo Martins', 'Lucia Ferreira', 'Marcos Pereira', 'Beatriz Gomes', 'Ricardo Dias'];
     
-    // Marcar alguns números como vendidos (exemplo)
-    const numSold = Math.floor(Math.random() * 50) + 20; // Entre 20 e 70 vendidos
+    const numSold = Math.floor(Math.random() * 50) + 20; 
     while (soldNumbers.size < numSold) {
         soldNumbers.add(Math.floor(Math.random() * 300) + 1);
     }
@@ -227,7 +207,6 @@ function renderNumbers() {
             numberCard.title = `Número ${item.number} - Vendido - Clique para ver detalhes`;
         }
 
-        // Adicionar evento de clique para abrir modal
         numberCard.addEventListener('click', () => {
             openModal(item);
         });
@@ -247,7 +226,6 @@ function updateStats() {
     document.getElementById('availableNumbers').textContent = available;
     document.getElementById('soldNumbers').textContent = sold;
     
-    // Atualizar barra de progresso da meta
     updateGoalProgress(sold);
 }
 
@@ -255,13 +233,11 @@ function updateGoalProgress(soldCount) {
     const currentAmount = soldCount * PRICE_PER_NUMBER;
     const percentage = Math.min((currentAmount / GOAL_AMOUNT) * 100, 100);
     
-    // Atualizar valor atual
     const currentAmountElement = document.getElementById('currentAmount');
     if (currentAmountElement) {
         currentAmountElement.textContent = currentAmount.toFixed(2).replace('.', ',');
     }
     
-    // Atualizar barra de progresso
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     
@@ -269,7 +245,6 @@ function updateGoalProgress(soldCount) {
         progressBar.style.width = percentage + '%';
         progressText.textContent = percentage.toFixed(1).replace('.', ',') + '%';
         
-        // Adicionar classe de sucesso se atingir a meta
         if (percentage >= 100) {
             progressBar.style.background = 'linear-gradient(90deg, #f39c12 0%, #e67e22 100%)';
             progressText.textContent = 'Meta Atingida!';
@@ -300,7 +275,6 @@ function searchNumber() {
     const searchValue = searchInput.value.trim().padStart(3, '0');
     
     if (searchValue.length === 0) {
-        // Se vazio, mostrar todos
         currentFilter = 'all';
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.filter === 'all');
@@ -317,7 +291,6 @@ function searchNumber() {
             card.classList.remove('hidden');
             card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
-            // Destacar temporariamente
             card.style.transform = 'scale(1.2)';
             setTimeout(() => {
                 card.style.transform = '';
@@ -335,32 +308,26 @@ function searchNumber() {
     }
 }
 
-// Atualizar dados a cada 30 segundos
 setInterval(() => {
     if (SHEET_URL !== 'SUA_URL_DO_GOOGLE_SHEETS_AQUI') {
         loadNumbersFromSheet();
     }
 }, 30000);
 
-// Made with Bob
 
 
-// Funções do Modal
 function setupModalListeners() {
     const modal = document.getElementById('infoModal');
     const closeBtn = document.querySelector('.modal-close');
 
-    // Fechar modal ao clicar no X
     closeBtn.addEventListener('click', closeModal);
 
-    // Fechar modal ao clicar fora dele
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal();
         }
     });
 
-    // Fechar modal com tecla ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.classList.contains('show')) {
             closeModal();
@@ -376,35 +343,27 @@ function openModal(numberData) {
     const sellerInfo = document.getElementById('sellerInfo');
     const availableInfo = document.getElementById('availableInfo');
 
-    // Preencher número
     modalNumber.textContent = numberData.number;
 
-    // Preencher status
     modalStatus.textContent = numberData.status === 'sold' ? 'Vendido' : 'Disponível';
     modalStatus.className = `info-value status-${numberData.status}`;
 
     if (numberData.status === 'sold') {
-        // Mostrar informações de comprador e vendedor
         buyerInfo.style.display = 'block';
         sellerInfo.style.display = 'block';
         availableInfo.style.display = 'none';
 
-        // Preencher dados do comprador
         document.getElementById('modalBuyer').textContent = numberData.buyer || 'Não informado';
         document.getElementById('modalBuyerPhone').textContent = formatPhone(numberData.buyerPhone) || 'Não informado';
 
-        // Preencher dados do vendedor (sem telefone)
         document.getElementById('modalSeller').textContent = numberData.seller || 'Não informado';
-        // Ocultar linha do telefone do vendedor
         document.getElementById('modalSellerPhone').parentElement.style.display = 'none';
     } else {
-        // Mostrar mensagem de disponível
         buyerInfo.style.display = 'none';
         sellerInfo.style.display = 'none';
         availableInfo.style.display = 'block';
     }
 
-    // Mostrar modal
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
 }
@@ -418,15 +377,11 @@ function closeModal() {
 function formatPhone(phone) {
     if (!phone) return '';
     
-    // Remove tudo que não é número
     const cleaned = phone.replace(/\D/g, '');
     
-    // Formata conforme o tamanho
     if (cleaned.length === 11) {
-        // Celular: (XX) XXXXX-XXXX
         return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
     } else if (cleaned.length === 10) {
-        // Fixo: (XX) XXXX-XXXX
         return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
     }
     
@@ -434,29 +389,23 @@ function formatPhone(phone) {
 }
 
 
-// Função para copiar chave PIX
 function copyPixKey() {
     const pixInput = document.getElementById('pixKey');
     const copyBtn = document.getElementById('copyPixBtn');
     const copyText = copyBtn.querySelector('.copy-text');
     
-    // Selecionar e copiar o texto
     pixInput.select();
-    pixInput.setSelectionRange(0, 99999); // Para mobile
+    pixInput.setSelectionRange(0, 99999); 
     
-    // Copiar para área de transferência
     navigator.clipboard.writeText(pixInput.value).then(() => {
-        // Feedback visual
         copyBtn.classList.add('copied');
         copyText.textContent = 'Copiado!';
         
-        // Voltar ao estado original após 2 segundos
         setTimeout(() => {
             copyBtn.classList.remove('copied');
             copyText.textContent = 'Copiar';
         }, 2000);
     }).catch(err => {
-        // Fallback para navegadores antigos
         try {
             document.execCommand('copy');
             copyBtn.classList.add('copied');
@@ -473,13 +422,11 @@ function copyPixKey() {
 }
 
 
-// Funções de Reserva de Números
 function setupReserveForm() {
     const form = document.getElementById('reserveForm');
     const selectedNumbersInput = document.getElementById('selectedNumbers');
     const buyerPhoneInput = document.getElementById('buyerPhone');
     
-    // Formatar telefone automaticamente
     buyerPhoneInput.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, '');
         if (value.length <= 11) {
@@ -494,10 +441,8 @@ function setupReserveForm() {
         e.target.value = value;
     });
     
-    // Atualizar resumo ao digitar números
     selectedNumbersInput.addEventListener('input', updateReserveSummary);
     
-    // Processar formulário
     form.addEventListener('submit', handleReserveSubmit);
 }
 
@@ -516,9 +461,8 @@ function updateReserveSummary() {
     const numbers = numbersText.split(',').map(n => n.trim()).filter(n => n);
     const count = numbers.length;
     
-    // Calcular valor com promoção: a cada 3 números = R$ 10,00
-    const promoSets = Math.floor(count / 3); // Quantos conjuntos de 3
-    const remaining = count % 3; // Números restantes
+    const promoSets = Math.floor(count / 3); 
+    const remaining = count % 3; 
     const total = (promoSets * PROMO_PRICE) + (remaining * PRICE_PER_NUMBER);
     
     totalNumbersElement.textContent = count;
@@ -533,7 +477,6 @@ function handleReserveSubmit(e) {
     const buyerPhone = document.getElementById('buyerPhone').value.trim();
     const selectedNumbersInput = document.getElementById('selectedNumbers').value.trim();
     
-    // Validar campos obrigatórios
     if (!sellerName) {
         alert('Por favor, informe o nome do vendedor.');
         return;
@@ -554,7 +497,6 @@ function handleReserveSubmit(e) {
         return;
     }
     
-    // Validar e processar números
     const numbersArray = selectedNumbersInput.split(',').map(n => n.trim()).filter(n => n);
     const validNumbers = [];
     const invalidNumbers = [];
@@ -573,7 +515,6 @@ function handleReserveSubmit(e) {
         }
     });
     
-    // Verificar erros
     if (invalidNumbers.length > 0) {
         alert(`Números inválidos: ${invalidNumbers.join(', ')}\nOs números devem estar entre 001 e 300.`);
         return;
@@ -589,13 +530,11 @@ function handleReserveSubmit(e) {
         return;
     }
     
-    // Calcular valor total com promoção: a cada 3 números = R$ 10,00
     const count = validNumbers.length;
-    const promoSets = Math.floor(count / 3); // Quantos conjuntos de 3
-    const remaining = count % 3; // Números restantes
+    const promoSets = Math.floor(count / 3); 
+    const remaining = count % 3; 
     const totalValue = (promoSets * PROMO_PRICE) + (remaining * PRICE_PER_NUMBER);
     
-    // Salvar reserva
     saveReservation({
         numbers: validNumbers,
         buyer: buyerName,
@@ -605,26 +544,21 @@ function handleReserveSubmit(e) {
         timestamp: new Date().toISOString()
     });
     
-    // Mostrar modal de confirmação
     showReservationConfirmation(validNumbers, buyerName, sellerName, totalValue);
     
-    // Limpar formulário
     document.getElementById('reserveForm').reset();
     updateReserveSummary();
 }
 
 async function saveReservation(reservation) {
-    // Verificar se a URL do Apps Script está configurada
     if (APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') {
         alert('⚠️ Configure a URL do Google Apps Script primeiro!\n\nVeja o arquivo CONFIGURAR_APPS_SCRIPT.md para instruções.');
         
-        // Salvar localmente como fallback
         saveReservationLocally(reservation);
         return;
     }
     
     try {
-        // Mostrar loading
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-overlay';
         loadingDiv.innerHTML = '<div class="loading-spinner">Salvando na planilha...</div>';
@@ -637,7 +571,6 @@ async function saveReservation(reservation) {
             seller: reservation.seller
         });
         
-        // Enviar para o Google Apps Script
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             headers: {
@@ -651,18 +584,14 @@ async function saveReservation(reservation) {
             })
         });
         
-        // Remover loading
         document.body.removeChild(loadingDiv);
         
-        // Tentar ler a resposta
         const result = await response.text();
         console.log('Resposta do servidor:', result);
         
-        // Verificar se foi bem-sucedido
         if (response.ok) {
             console.log('✅ Dados salvos com sucesso na planilha!');
             
-            // Atualizar números como vendidos localmente
             reservation.numbers.forEach(num => {
                 const numberData = allNumbers.find(n => n.number === num);
                 if (numberData) {
@@ -673,14 +602,11 @@ async function saveReservation(reservation) {
                 }
             });
             
-            // Salvar também localmente como backup
             saveReservationLocally(reservation);
             
-            // Atualizar interface
             renderNumbers();
             updateStats();
             
-            // Recarregar dados da planilha após 3 segundos
             setTimeout(() => {
                 console.log('Recarregando dados da planilha...');
                 loadNumbersFromSheet();
@@ -692,7 +618,6 @@ async function saveReservation(reservation) {
     } catch (error) {
         console.error('❌ Erro ao salvar reserva:', error);
         
-        // Remover loading se ainda estiver visível
         const loadingDiv = document.querySelector('.loading-overlay');
         if (loadingDiv) {
             document.body.removeChild(loadingDiv);
@@ -700,22 +625,17 @@ async function saveReservation(reservation) {
         
         alert('⚠️ Erro ao salvar na planilha.\n\nVerifique:\n1. Se o Apps Script está implantado corretamente\n2. Se a URL está correta\n3. O console do navegador (F12) para mais detalhes\n\nOs dados foram salvos localmente como backup.');
         
-        // Salvar localmente como fallback
         saveReservationLocally(reservation);
     }
 }
 
 function saveReservationLocally(reservation) {
-    // Obter reservas existentes
     let reservations = JSON.parse(localStorage.getItem('rifaReservations') || '[]');
     
-    // Adicionar nova reserva
     reservations.push(reservation);
     
-    // Salvar no localStorage
     localStorage.setItem('rifaReservations', JSON.stringify(reservations));
     
-    // Atualizar números como vendidos localmente
     reservation.numbers.forEach(num => {
         const numberData = allNumbers.find(n => n.number === num);
         if (numberData) {
@@ -726,7 +646,6 @@ function saveReservationLocally(reservation) {
         }
     });
     
-    // Atualizar interface
     renderNumbers();
     updateStats();
 }
