@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa - Romaria dos Jovens | Paróquia Santa Terezinha</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Rifa - Romaria dos Jovens</h1>
+            <p class="subtitle">Paróquia Santa Terezinha</p>
+            <p class="destination">Destino: Santuário de Nossa Senhora Aparecida</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="info-section">
+            <h2>Consulte os Números Disponíveis</h2>
+            <p>Confira abaixo os números da rifa que ainda estão disponíveis para aquisição.</p>
+        </section>
+
+        <section class="filter-section">
+            <div class="search-box">
+                <input type="text" id="searchNumber" placeholder="Buscar número específico (ex: 001)" maxlength="3">
+                <button id="searchBtn">Buscar</button>
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="available">Disponíveis</button>
+                <button class="filter-btn" data-filter="sold">Vendidos</button>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <div class="stat-card">
+                <span class="stat-number" id="totalNumbers">300</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-card available">
+                <span class="stat-number" id="availableNumbers">-</span>
+                <span class="stat-label">Disponíveis</span>
+            </div>
+            <div class="stat-card sold">
+                <span class="stat-number" id="soldNumbers">-</span>
+                <span class="stat-label">Vendidos</span>
+            </div>
+        </section>
+
+        <section class="numbers-section">
+            <div id="loadingMessage" class="loading">
+                Carregando números...
+            </div>
+            <div id="errorMessage" class="error" style="display: none;">
+                Erro ao carregar os números. Tente novamente mais tarde.
+            </div>
+            <div id="numbersGrid" class="numbers-grid">
+                <!-- Os números serão carregados aqui via JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Paróquia Santa Terezinha</p>
+            <p class="footer-small">Romaria dos Jovens ao Santuário de Nossa Senhora Aparecida</p>
+        </div>
+    </footer>
+
+    <!-- Modal de Informações -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="modal-title">Número <span id="modalNumber"></span></h2>
+            <div class="modal-body">
+                <div class="info-group">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value" id="modalStatus"></span>
+                </div>
+                <div id="buyerInfo" class="buyer-section">
+                    <h3>Informações do Comprador</h3>
+                    <div class="info-group">
+                        <span class="info-label">Nome:</span>
+                        <span class="info-value" id="modalBuyer"></span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">Telefone:</span>
+                        <span class="info-value" id="modalBuyerPhone"></span>
+                    </div>
+                </div>
+                <div id="sellerInfo" class="seller-section">
+                    <h3>Informações do Vendedor</h3>
+                    <div class="info-group">
+                        <span class="info-label">Nome:</span>
+                        <span class="info-value" id="modalSeller"></span>
+                    </div>
+                    <div class="info-group">
+                        <span class="info-label">Telefone:</span>
+                        <span class="info-value" id="modalSellerPhone"></span>
+                    </div>
+                </div>
+                <div id="availableInfo" class="available-message">
+                    <p>Este número está disponível para compra.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
