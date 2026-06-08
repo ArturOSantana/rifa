@@ -23,7 +23,7 @@ O site precisa estar hospedado online para acessar o Google Sheets devido a rest
    - styles.css
    - script.js
    - README.md
-3. Clique em "Commit changes"
+3. Clique em "Commit changes
 
 ### Passo 4: Ativar GitHub Pages
 1. No repositório, clique em "Settings"
