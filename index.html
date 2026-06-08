@@ -11,14 +11,14 @@
         <div class="container">
             <h1>Rifa - Romaria dos Jovens</h1>
             <p class="subtitle">Paróquia Santa Terezinha</p>
-            <p class="destination">Destino: Santuário de Nossa Senhora Aparecida</p>
+            <p class="destination">Santuário de Nossa Senhora Aparecida</p>
         </div>
     </header>
 
     <main class="container">
         <section class="info-section">
-            <h2>Consulte os Números Disponíveis</h2>
-            <p>Confira abaixo os números da rifa que ainda estão disponíveis para aquisição.</p>
+            <h2>Números Disponíveis</h2>
+            <p>Confira os números da rifa disponíveis para compra.</p>
         </section>
 
         <section class="filter-section">
@@ -47,32 +47,32 @@
                     <span class="progress-text" id="progressText">0%</span>
                 </div>
             </div>
-            <p class="goal-info">💰 Cada número: R$ 5,00 | Promoção: 3 números por R$ 10,00</p>
+            <p class="goal-info">R$ 5,00 cada | 3 por R$ 10,00</p>
         </section>
 
         <section class="reserve-section">
             <h3>Registrar Venda</h3>
             <div class="price-alert">
-                <strong>💰 ATENÇÃO:</strong> Cada número vale R$ 5,00 | Promoção: 3 números por R$ 10,00
+                <strong>Valores:</strong> R$ 5,00 cada | 3 por R$ 10,00
             </div>
-            <p class="reserve-description">Vendedores: Preencha o formulário abaixo para registrar a venda dos números:</p>
+            <p class="reserve-description">Vendedores: preencha os dados abaixo para registrar a venda:</p>
             <form id="reserveForm" class="reserve-form">
                 <div class="form-group">
-                    <label for="sellerName">Seu Nome (Vendedor) *</label>
-                    <input type="text" id="sellerName" required placeholder="Digite seu nome">
+                    <label for="sellerName">Vendedor *</label>
+                    <input type="text" id="sellerName" required placeholder="Seu nome">
                 </div>
                 <div class="form-group">
-                    <label for="buyerName">Nome do Comprador *</label>
-                    <input type="text" id="buyerName" required placeholder="Nome completo do comprador">
+                    <label for="buyerName">Comprador *</label>
+                    <input type="text" id="buyerName" required placeholder="Nome do comprador">
                 </div>
                 <div class="form-group">
-                    <label for="buyerPhone">Telefone do Comprador (WhatsApp) *</label>
+                    <label for="buyerPhone">WhatsApp *</label>
                     <input type="tel" id="buyerPhone" required placeholder="(00) 00000-0000">
                 </div>
                 <div class="form-group">
-                    <label for="selectedNumbers">Números Vendidos *</label>
-                    <input type="text" id="selectedNumbers" required placeholder="Ex: 001, 015, 123 (separados por vírgula)">
-                    <small>Digite os números vendidos, separados por vírgula</small>
+                    <label for="selectedNumbers">Números *</label>
+                    <input type="text" id="selectedNumbers" required placeholder="Ex: 001, 015, 123">
+                    <small>Separe os números por vírgula</small>
                 </div>
                 <div class="form-summary">
                     <p>Total de números: <strong id="totalNumbersSelected">0</strong></p>
@@ -84,14 +84,14 @@
 
         <section class="pix-section">
             <h3>Pagamento via PIX</h3>
-            <p class="pix-description">Copie a chave PIX abaixo para fazer o pagamento:</p>
+            <p class="pix-description">Copie a chave PIX para pagamento:</p>
             <div class="pix-container">
                 <input type="text" id="pixKey" value="artursantana123@gmail.com" readonly>
                 <button id="copyPixBtn" class="copy-btn">
                     <span class="copy-text">Copiar PIX</span>
                 </button>
             </div>
-            <p class="pix-info">Após o pagamento, envie o comprovante para confirmar sua participação.</p>
+            <p class="pix-info">Envie o comprovante após o pagamento.</p>
         </section>
 
         <section class="stats-section">
