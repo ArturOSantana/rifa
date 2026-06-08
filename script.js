@@ -455,18 +455,80 @@ function updateReserveSummary() {
     if (!numbersText) {
         totalNumbersElement.textContent = '0';
         totalPriceElement.textContent = 'R$ 0,00';
+        selectedNumbersInput.style.borderColor = '';
+        selectedNumbersInput.style.backgroundColor = '';
+        removeValidationMessage();
         return;
     }
     
     const numbers = numbersText.split(',').map(n => n.trim()).filter(n => n);
-    const count = numbers.length;
+    const validNumbers = [];
+    const soldNumbers = [];
+    const invalidNumbers = [];
     
-    const promoSets = Math.floor(count / 3); 
-    const remaining = count % 3; 
+    numbers.forEach(num => {
+        const paddedNum = num.padStart(3, '0');
+        const numberData = allNumbers.find(n => n.number === paddedNum);
+        
+        if (!numberData) {
+            invalidNumbers.push(num);
+        } else if (numberData.status === 'sold') {
+            soldNumbers.push(paddedNum);
+        } else {
+            validNumbers.push(paddedNum);
+        }
+    });
+    
+    // Feedback visual
+    if (soldNumbers.length > 0 || invalidNumbers.length > 0) {
+        selectedNumbersInput.style.borderColor = '#e74c3c';
+        selectedNumbersInput.style.backgroundColor = '#ffe6e6';
+        
+        let message = '';
+        if (soldNumbers.length > 0) {
+            message += `❌ Números já vendidos: ${soldNumbers.join(', ')}`;
+        }
+        if (invalidNumbers.length > 0) {
+            if (message) message += '<br>';
+            message += `⚠️ Números inválidos: ${invalidNumbers.join(', ')}`;
+        }
+        showValidationMessage(message, 'error');
+    } else if (validNumbers.length > 0) {
+        selectedNumbersInput.style.borderColor = '#27ae60';
+        selectedNumbersInput.style.backgroundColor = '#e8f8f0';
+        showValidationMessage(`✅ ${validNumbers.length} número(s) disponível(is)`, 'success');
+    } else {
+        selectedNumbersInput.style.borderColor = '';
+        selectedNumbersInput.style.backgroundColor = '';
+        removeValidationMessage();
+    }
+    
+    const count = validNumbers.length;
+    const promoSets = Math.floor(count / 3);
+    const remaining = count % 3;
     const total = (promoSets * PROMO_PRICE) + (remaining * PRICE_PER_NUMBER);
     
     totalNumbersElement.textContent = count;
     totalPriceElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
+
+function showValidationMessage(message, type) {
+    removeValidationMessage();
+    
+    const selectedNumbersInput = document.getElementById('selectedNumbers');
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'validationMessage';
+    messageDiv.className = `validation-message ${type}`;
+    messageDiv.innerHTML = message;
+    
+    selectedNumbersInput.parentNode.appendChild(messageDiv);
+}
+
+function removeValidationMessage() {
+    const existingMessage = document.getElementById('validationMessage');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
 }
 
 function handleReserveSubmit(e) {
