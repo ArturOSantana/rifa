@@ -515,7 +515,11 @@ function updateReserveSummary() {
     
     const numbers = numbersText.split(',').map(n => n.trim()).filter(n => n);
     const count = numbers.length;
-    const total = count * PRICE_PER_NUMBER;
+    
+    // Calcular valor com promoção: a cada 3 números = R$ 10,00
+    const promoSets = Math.floor(count / 3); // Quantos conjuntos de 3
+    const remaining = count % 3; // Números restantes
+    const total = (promoSets * PROMO_PRICE) + (remaining * PRICE_PER_NUMBER);
     
     totalNumbersElement.textContent = count;
     totalPriceElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
@@ -585,8 +589,11 @@ function handleReserveSubmit(e) {
         return;
     }
     
-    // Calcular valor total
-    const totalValue = validNumbers.length * PRICE_PER_NUMBER;
+    // Calcular valor total com promoção: a cada 3 números = R$ 10,00
+    const count = validNumbers.length;
+    const promoSets = Math.floor(count / 3); // Quantos conjuntos de 3
+    const remaining = count % 3; // Números restantes
+    const totalValue = (promoSets * PROMO_PRICE) + (remaining * PRICE_PER_NUMBER);
     
     // Salvar reserva
     saveReservation({
@@ -620,15 +627,21 @@ async function saveReservation(reservation) {
         // Mostrar loading
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-overlay';
-        loadingDiv.innerHTML = '<div class="loading-spinner">Salvando reserva...</div>';
+        loadingDiv.innerHTML = '<div class="loading-spinner">Salvando na planilha...</div>';
         document.body.appendChild(loadingDiv);
+        
+        console.log('Enviando dados para Google Sheets:', {
+            numbers: reservation.numbers,
+            buyer: reservation.buyer,
+            buyerPhone: reservation.buyerPhone,
+            seller: reservation.seller
+        });
         
         // Enviar para o Google Apps Script
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // Necessário para Apps Script
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'text/plain',
             },
             body: JSON.stringify({
                 numbers: reservation.numbers,
@@ -641,36 +654,51 @@ async function saveReservation(reservation) {
         // Remover loading
         document.body.removeChild(loadingDiv);
         
-        // Como usamos no-cors, não podemos ler a resposta
-        // Mas se chegou aqui, provavelmente funcionou
-        console.log('Reserva enviada para o Google Sheets');
+        // Tentar ler a resposta
+        const result = await response.text();
+        console.log('Resposta do servidor:', result);
         
-        // Atualizar números como vendidos localmente
-        reservation.numbers.forEach(num => {
-            const numberData = allNumbers.find(n => n.number === num);
-            if (numberData) {
-                numberData.status = 'sold';
-                numberData.buyer = reservation.buyer;
-                numberData.buyerPhone = reservation.buyerPhone;
-                numberData.seller = reservation.seller;
-            }
-        });
-        
-        // Salvar também localmente como backup
-        saveReservationLocally(reservation);
-        
-        // Atualizar interface
-        renderNumbers();
-        updateStats();
-        
-        // Recarregar dados da planilha após 2 segundos
-        setTimeout(() => {
-            loadNumbersFromSheet();
-        }, 2000);
+        // Verificar se foi bem-sucedido
+        if (response.ok) {
+            console.log('✅ Dados salvos com sucesso na planilha!');
+            
+            // Atualizar números como vendidos localmente
+            reservation.numbers.forEach(num => {
+                const numberData = allNumbers.find(n => n.number === num);
+                if (numberData) {
+                    numberData.status = 'sold';
+                    numberData.buyer = reservation.buyer;
+                    numberData.buyerPhone = reservation.buyerPhone;
+                    numberData.seller = reservation.seller;
+                }
+            });
+            
+            // Salvar também localmente como backup
+            saveReservationLocally(reservation);
+            
+            // Atualizar interface
+            renderNumbers();
+            updateStats();
+            
+            // Recarregar dados da planilha após 3 segundos
+            setTimeout(() => {
+                console.log('Recarregando dados da planilha...');
+                loadNumbersFromSheet();
+            }, 3000);
+        } else {
+            throw new Error('Erro ao salvar: ' + result);
+        }
         
     } catch (error) {
-        console.error('Erro ao salvar reserva:', error);
-        alert('Erro ao salvar na planilha. Os dados foram salvos localmente.');
+        console.error('❌ Erro ao salvar reserva:', error);
+        
+        // Remover loading se ainda estiver visível
+        const loadingDiv = document.querySelector('.loading-overlay');
+        if (loadingDiv) {
+            document.body.removeChild(loadingDiv);
+        }
+        
+        alert('⚠️ Erro ao salvar na planilha.\n\nVerifique:\n1. Se o Apps Script está implantado corretamente\n2. Se a URL está correta\n3. O console do navegador (F12) para mais detalhes\n\nOs dados foram salvos localmente como backup.');
         
         // Salvar localmente como fallback
         saveReservationLocally(reservation);
