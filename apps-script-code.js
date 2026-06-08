@@ -7,12 +7,12 @@ function doPost(e) {
     Logger.log('Requisição recebida');
     
     // Obter a planilha ativa
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1');
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Página1');
     
     if (!sheet) {
       return ContentService.createTextOutput(JSON.stringify({
         success: false,
-        message: 'Planilha "Sheet1" não encontrada'
+        message: 'Planilha "Página1" não encontrada'
       })).setMimeType(ContentService.MimeType.JSON);
     }
     

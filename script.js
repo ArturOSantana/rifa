@@ -1,7 +1,7 @@
 // Configuração do Google Sheets
 // Usando o ID original da planilha (não o ID publicado)
 const SHEET_ID = '1QL9hka6P8SG_2un3JAsQWgs8mu7E44K3SXZOhTjF69k';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Página1`;
 
 // URL do Google Apps Script para salvar reservas
 // IMPORTANTE: Substitua pela URL do seu Apps Script após implantação
