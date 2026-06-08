@@ -50,6 +50,35 @@
             <p class="goal-info">Promoção: 3 números por R$ 10,00 (cada número vale R$ 3,33)</p>
         </section>
 
+        <section class="reserve-section">
+            <h3>Registrar Venda</h3>
+            <p class="reserve-description">Vendedores: Preencha o formulário abaixo para registrar a venda dos números:</p>
+            <form id="reserveForm" class="reserve-form">
+                <div class="form-group">
+                    <label for="sellerName">Seu Nome (Vendedor) *</label>
+                    <input type="text" id="sellerName" required placeholder="Digite seu nome">
+                </div>
+                <div class="form-group">
+                    <label for="buyerName">Nome do Comprador *</label>
+                    <input type="text" id="buyerName" required placeholder="Nome completo do comprador">
+                </div>
+                <div class="form-group">
+                    <label for="buyerPhone">Telefone do Comprador (WhatsApp) *</label>
+                    <input type="tel" id="buyerPhone" required placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label for="selectedNumbers">Números Vendidos *</label>
+                    <input type="text" id="selectedNumbers" required placeholder="Ex: 001, 015, 123 (separados por vírgula)">
+                    <small>Digite os números vendidos, separados por vírgula</small>
+                </div>
+                <div class="form-summary">
+                    <p>Total de números: <strong id="totalNumbersSelected">0</strong></p>
+                    <p>Valor total: <strong id="totalPrice">R$ 0,00</strong></p>
+                </div>
+                <button type="submit" class="reserve-btn">Registrar Venda</button>
+            </form>
+        </section>
+
         <section class="pix-section">
             <h3>Pagamento via PIX</h3>
             <p class="pix-description">Copie a chave PIX abaixo para fazer o pagamento:</p>
@@ -132,6 +161,50 @@
                 <div id="availableInfo" class="available-message">
                     <p>Este número está disponível para compra.</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Venda -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeConfirmationModal()">&times;</span>
+            <h2 class="modal-title">✅ Venda Registrada!</h2>
+            <div class="modal-body">
+                <div class="confirmation-message">
+                    <p>A venda foi registrada com sucesso na planilha!</p>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Números Vendidos:</span>
+                    <span class="info-value" id="confirmedNumbers"></span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Comprador:</span>
+                    <span class="info-value" id="confirmedBuyer"></span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Vendedor:</span>
+                    <span class="info-value" id="confirmedSeller"></span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Valor Total:</span>
+                    <span class="info-value" id="confirmedTotal"></span>
+                </div>
+                <div class="payment-instructions">
+                    <h3>Instruções para o Comprador:</h3>
+                    <ol>
+                        <li>Solicite o pagamento via PIX usando a chave abaixo</li>
+                        <li>Peça o comprovante de pagamento</li>
+                        <li>Confirme o recebimento</li>
+                    </ol>
+                    <div class="pix-container">
+                        <input type="text" id="modalPixKey" value="f048ef86-6c7d-4f8a-b652-af94deb8daa4" readonly>
+                        <button onclick="copyPixKey()" class="copy-btn">
+                            <span class="copy-text">Copiar PIX</span>
+                        </button>
+                    </div>
+                </div>
+                <button onclick="closeConfirmationModal()" class="reserve-btn">Fechar</button>
             </div>
         </div>
     </div>

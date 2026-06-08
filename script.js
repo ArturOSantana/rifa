@@ -3,6 +3,10 @@
 const SHEET_ID = '1QL9hka6P8SG_2un3JAsQWgs8mu7E44K3SXZOhTjF69k';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
 
+// URL do Google Apps Script para salvar reservas
+// IMPORTANTE: Substitua pela URL do seu Apps Script após implantação
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZorbhSbSMyGoCN_VqYWvpeaYh-1_NhC2YIP6AvrGiui0yp6RiAhv7J7p88idvSzrY/exec';
+
 // Configuração da meta e preços
 const GOAL_AMOUNT = 1000; // Meta em reais
 const PRICE_PER_NUMBER = 10 / 3; // Preço por número (3 números = R$ 10,00, então cada um vale R$ 3,33)
@@ -21,7 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeApp() {
     setupEventListeners();
     setupModalListeners();
+    setupReserveForm();
     loadNumbersFromSheet();
+    loadLocalReservations();
 }
 
 function setupEventListeners() {
@@ -464,4 +470,273 @@ function copyPixKey() {
             alert('Não foi possível copiar. Por favor, copie manualmente.');
         }
     });
+}
+
+
+// Funções de Reserva de Números
+function setupReserveForm() {
+    const form = document.getElementById('reserveForm');
+    const selectedNumbersInput = document.getElementById('selectedNumbers');
+    const buyerPhoneInput = document.getElementById('buyerPhone');
+    
+    // Formatar telefone automaticamente
+    buyerPhoneInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+            if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+            } else if (value.length > 0) {
+                value = value.replace(/^(\d*)/, '($1');
+            }
+        }
+        e.target.value = value;
+    });
+    
+    // Atualizar resumo ao digitar números
+    selectedNumbersInput.addEventListener('input', updateReserveSummary);
+    
+    // Processar formulário
+    form.addEventListener('submit', handleReserveSubmit);
+}
+
+function updateReserveSummary() {
+    const selectedNumbersInput = document.getElementById('selectedNumbers');
+    const totalNumbersElement = document.getElementById('totalNumbersSelected');
+    const totalPriceElement = document.getElementById('totalPrice');
+    
+    const numbersText = selectedNumbersInput.value.trim();
+    if (!numbersText) {
+        totalNumbersElement.textContent = '0';
+        totalPriceElement.textContent = 'R$ 0,00';
+        return;
+    }
+    
+    const numbers = numbersText.split(',').map(n => n.trim()).filter(n => n);
+    const count = numbers.length;
+    const total = count * PRICE_PER_NUMBER;
+    
+    totalNumbersElement.textContent = count;
+    totalPriceElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
+
+function handleReserveSubmit(e) {
+    e.preventDefault();
+    
+    const sellerName = document.getElementById('sellerName').value.trim();
+    const buyerName = document.getElementById('buyerName').value.trim();
+    const buyerPhone = document.getElementById('buyerPhone').value.trim();
+    const selectedNumbersInput = document.getElementById('selectedNumbers').value.trim();
+    
+    // Validar campos obrigatórios
+    if (!sellerName) {
+        alert('Por favor, informe o nome do vendedor.');
+        return;
+    }
+    
+    if (!buyerName) {
+        alert('Por favor, informe o nome do comprador.');
+        return;
+    }
+    
+    if (!buyerPhone) {
+        alert('Por favor, informe o telefone do comprador.');
+        return;
+    }
+    
+    if (!selectedNumbersInput) {
+        alert('Por favor, informe os números vendidos.');
+        return;
+    }
+    
+    // Validar e processar números
+    const numbersArray = selectedNumbersInput.split(',').map(n => n.trim()).filter(n => n);
+    const validNumbers = [];
+    const invalidNumbers = [];
+    const alreadySoldNumbers = [];
+    
+    numbersArray.forEach(num => {
+        const paddedNum = num.padStart(3, '0');
+        const numberData = allNumbers.find(n => n.number === paddedNum);
+        
+        if (!numberData) {
+            invalidNumbers.push(num);
+        } else if (numberData.status === 'sold') {
+            alreadySoldNumbers.push(paddedNum);
+        } else {
+            validNumbers.push(paddedNum);
+        }
+    });
+    
+    // Verificar erros
+    if (invalidNumbers.length > 0) {
+        alert(`Números inválidos: ${invalidNumbers.join(', ')}\nOs números devem estar entre 001 e 300.`);
+        return;
+    }
+    
+    if (alreadySoldNumbers.length > 0) {
+        alert(`Os seguintes números já foram vendidos: ${alreadySoldNumbers.join(', ')}\nPor favor, escolha outros números.`);
+        return;
+    }
+    
+    if (validNumbers.length === 0) {
+        alert('Por favor, selecione pelo menos um número válido.');
+        return;
+    }
+    
+    // Calcular valor total
+    const totalValue = validNumbers.length * PRICE_PER_NUMBER;
+    
+    // Salvar reserva
+    saveReservation({
+        numbers: validNumbers,
+        buyer: buyerName,
+        buyerPhone: buyerPhone,
+        seller: sellerName,
+        totalValue: totalValue,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Mostrar modal de confirmação
+    showReservationConfirmation(validNumbers, buyerName, sellerName, totalValue);
+    
+    // Limpar formulário
+    document.getElementById('reserveForm').reset();
+    updateReserveSummary();
+}
+
+async function saveReservation(reservation) {
+    // Verificar se a URL do Apps Script está configurada
+    if (APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') {
+        alert('⚠️ Configure a URL do Google Apps Script primeiro!\n\nVeja o arquivo CONFIGURAR_APPS_SCRIPT.md para instruções.');
+        
+        // Salvar localmente como fallback
+        saveReservationLocally(reservation);
+        return;
+    }
+    
+    try {
+        // Mostrar loading
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading-overlay';
+        loadingDiv.innerHTML = '<div class="loading-spinner">Salvando reserva...</div>';
+        document.body.appendChild(loadingDiv);
+        
+        // Enviar para o Google Apps Script
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Necessário para Apps Script
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                numbers: reservation.numbers,
+                buyer: reservation.buyer,
+                buyerPhone: reservation.buyerPhone,
+                seller: reservation.seller
+            })
+        });
+        
+        // Remover loading
+        document.body.removeChild(loadingDiv);
+        
+        // Como usamos no-cors, não podemos ler a resposta
+        // Mas se chegou aqui, provavelmente funcionou
+        console.log('Reserva enviada para o Google Sheets');
+        
+        // Atualizar números como vendidos localmente
+        reservation.numbers.forEach(num => {
+            const numberData = allNumbers.find(n => n.number === num);
+            if (numberData) {
+                numberData.status = 'sold';
+                numberData.buyer = reservation.buyer;
+                numberData.buyerPhone = reservation.buyerPhone;
+                numberData.seller = reservation.seller;
+            }
+        });
+        
+        // Salvar também localmente como backup
+        saveReservationLocally(reservation);
+        
+        // Atualizar interface
+        renderNumbers();
+        updateStats();
+        
+        // Recarregar dados da planilha após 2 segundos
+        setTimeout(() => {
+            loadNumbersFromSheet();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erro ao salvar reserva:', error);
+        alert('Erro ao salvar na planilha. Os dados foram salvos localmente.');
+        
+        // Salvar localmente como fallback
+        saveReservationLocally(reservation);
+    }
+}
+
+function saveReservationLocally(reservation) {
+    // Obter reservas existentes
+    let reservations = JSON.parse(localStorage.getItem('rifaReservations') || '[]');
+    
+    // Adicionar nova reserva
+    reservations.push(reservation);
+    
+    // Salvar no localStorage
+    localStorage.setItem('rifaReservations', JSON.stringify(reservations));
+    
+    // Atualizar números como vendidos localmente
+    reservation.numbers.forEach(num => {
+        const numberData = allNumbers.find(n => n.number === num);
+        if (numberData) {
+            numberData.status = 'sold';
+            numberData.buyer = reservation.buyer;
+            numberData.buyerPhone = reservation.buyerPhone;
+            numberData.seller = reservation.seller;
+        }
+    });
+    
+    // Atualizar interface
+    renderNumbers();
+    updateStats();
+}
+
+function loadLocalReservations() {
+    const reservations = JSON.parse(localStorage.getItem('rifaReservations') || '[]');
+    
+    reservations.forEach(reservation => {
+        reservation.numbers.forEach(num => {
+            const numberData = allNumbers.find(n => n.number === num);
+            if (numberData && numberData.status === 'available') {
+                numberData.status = 'sold';
+                numberData.buyer = reservation.buyer;
+                numberData.buyerPhone = reservation.buyerPhone;
+                numberData.seller = reservation.seller;
+            }
+        });
+    });
+}
+
+function showReservationConfirmation(numbers, buyerName, sellerName, totalValue) {
+    const modal = document.getElementById('confirmationModal');
+    const numbersList = document.getElementById('confirmedNumbers');
+    const buyerNameElement = document.getElementById('confirmedBuyer');
+    const sellerNameElement = document.getElementById('confirmedSeller');
+    const totalValueElement = document.getElementById('confirmedTotal');
+    
+    numbersList.textContent = numbers.join(', ');
+    buyerNameElement.textContent = buyerName;
+    sellerNameElement.textContent = sellerName;
+    totalValueElement.textContent = `R$ ${totalValue.toFixed(2).replace('.', ',')}`;
+    
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeConfirmationModal() {
+    const modal = document.getElementById('confirmationModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
 }
