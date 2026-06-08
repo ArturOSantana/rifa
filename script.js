@@ -5,7 +5,7 @@ const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tq
 
 // URL do Google Apps Script para salvar reservas
 // IMPORTANTE: Substitua pela URL do seu Apps Script após implantação
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZorbhSbSMyGoCN_VqYWvpeaYh-1_NhC2YIP6AvrGiui0yp6RiAhv7J7p88idvSzrY/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMfH6tLLyq_-WtVTKbtq7gZrQESn2YrSqHsUgzjtAdXcmEtEMuX7mfmS8dGPJwAUU_/exec';
 
 // Configuração da meta e preços
 const GOAL_AMOUNT = 1000; // Meta em reais
