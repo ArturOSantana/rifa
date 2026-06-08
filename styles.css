@@ -1,3 +1,4 @@
+/* Rifa Romaria - Versão 2.0 - Atualizado */
 * {
     margin: 0;
     padding: 0;
@@ -538,48 +539,47 @@ footer .footer-small {
 /* Goal Section */
 .goal-section {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    padding: 30px 25px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
+    padding: 35px 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     margin-bottom: 25px;
     color: var(--white);
 }
 
 .goal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
+    text-align: center;
+    margin-bottom: 25px;
 }
 
 .goal-header h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    letter-spacing: 0.5px;
 }
 
 .goal-values {
     display: flex;
     align-items: baseline;
-    gap: 8px;
-    font-weight: 600;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 700;
 }
 
 .current-value {
-    font-size: 24px;
+    font-size: 36px;
     color: var(--white);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .goal-separator {
-    font-size: 20px;
-    opacity: 0.7;
+    font-size: 28px;
+    opacity: 0.8;
 }
 
 .goal-value {
-    font-size: 18px;
-    opacity: 0.9;
+    font-size: 28px;
+    opacity: 0.95;
 }
 
 .progress-bar-container {
@@ -684,62 +684,72 @@ footer .footer-small {
 /* PIX Section */
 .pix-section {
     background: var(--white);
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     margin-bottom: 25px;
-    border-left: 4px solid var(--accent-color);
+    border-left: 5px solid var(--accent-color);
 }
 
 .pix-section h3 {
     color: var(--primary-color);
-    font-size: 20px;
-    margin-bottom: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
 }
 
 .pix-description {
-    color: var(--text-light);
+    color: var(--text-dark);
     font-size: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    font-weight: 500;
 }
 
 .pix-container {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 18px;
 }
 
 .pix-container input {
     flex: 1;
-    padding: 12px 15px;
+    padding: 14px 18px;
     border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: 10px;
+    font-size: 15px;
     font-family: 'Courier New', monospace;
     background: var(--light-bg);
     color: var(--text-dark);
+    font-weight: 600;
+    transition: border-color 0.3s;
+}
+
+.pix-container input:focus {
+    outline: none;
+    border-color: var(--accent-color);
 }
 
 .copy-btn {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 20px;
+    padding: 14px 24px;
     background: var(--accent-color);
     color: var(--white);
     border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s;
     white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
 }
 
 .copy-btn:hover {
     background: var(--primary-color);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
 }
 
 .copy-btn:active {
@@ -748,17 +758,15 @@ footer .footer-small {
 
 .copy-btn.copied {
     background: var(--success-color);
-}
-
-.copy-icon {
-    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
 }
 
 .pix-info {
     color: var(--text-light);
-    font-size: 13px;
+    font-size: 14px;
     margin: 0;
     text-align: center;
+    font-weight: 500;
 }
 
 /* PIX Section Responsive */
