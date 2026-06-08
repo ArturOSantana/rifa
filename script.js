@@ -3,9 +3,11 @@
 const SHEET_ID = '1QL9hka6P8SG_2un3JAsQWgs8mu7E44K3SXZOhTjF69k';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
 
-// Configuração da meta
+// Configuração da meta e preços
 const GOAL_AMOUNT = 1000; // Meta em reais
-const PRICE_PER_NUMBER = 5; // Preço por número
+const PRICE_PER_NUMBER = 10 / 3; // Preço por número (3 números = R$ 10,00, então cada um vale R$ 3,33)
+const PROMO_PRICE = 10; // 3 números por R$ 10,00
+const PROMO_QUANTITY = 3;
 
 // Estado da aplicação
 let allNumbers = [];
