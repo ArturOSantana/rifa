@@ -817,6 +817,34 @@ footer .footer-small {
     border-radius: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
+
+/* Alerta de Preço */
+.price-alert {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(243, 156, 18, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.price-alert strong {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
 }
 
 .reserve-section h3 {

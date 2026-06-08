@@ -9,8 +9,8 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZorbhSbSMyGoC
 
 // Configuração da meta e preços
 const GOAL_AMOUNT = 1000; // Meta em reais
-const PRICE_PER_NUMBER = 10 / 3; // Preço por número (3 números = R$ 10,00, então cada um vale R$ 3,33)
-const PROMO_PRICE = 10; // 3 números por R$ 10,00
+const PRICE_PER_NUMBER = 5; // Preço por número: R$ 5,00
+const PROMO_PRICE = 10; // Promoção: 3 números por R$ 10,00
 const PROMO_QUANTITY = 3;
 
 // Estado da aplicação
