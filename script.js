@@ -3,6 +3,10 @@
 const SHEET_ID = '1QL9hka6P8SG_2un3JAsQWgs8mu7E44K3SXZOhTjF69k';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
 
+// Configuração da meta
+const GOAL_AMOUNT = 1000; // Meta em reais
+const PRICE_PER_NUMBER = 5; // Preço por número
+
 // Estado da aplicação
 let allNumbers = [];
 let currentFilter = 'all';
@@ -45,6 +49,12 @@ function setupEventListeners() {
     searchInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/[^0-9]/g, '');
     });
+
+    // Botão copiar PIX
+    const copyPixBtn = document.getElementById('copyPixBtn');
+    if (copyPixBtn) {
+        copyPixBtn.addEventListener('click', copyPixKey);
+    }
 }
 
 async function loadNumbersFromSheet() {
@@ -228,6 +238,35 @@ function updateStats() {
     document.getElementById('totalNumbers').textContent = total;
     document.getElementById('availableNumbers').textContent = available;
     document.getElementById('soldNumbers').textContent = sold;
+    
+    // Atualizar barra de progresso da meta
+    updateGoalProgress(sold);
+}
+
+function updateGoalProgress(soldCount) {
+    const currentAmount = soldCount * PRICE_PER_NUMBER;
+    const percentage = Math.min((currentAmount / GOAL_AMOUNT) * 100, 100);
+    
+    // Atualizar valor atual
+    const currentAmountElement = document.getElementById('currentAmount');
+    if (currentAmountElement) {
+        currentAmountElement.textContent = currentAmount.toFixed(2).replace('.', ',');
+    }
+    
+    // Atualizar barra de progresso
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressBar && progressText) {
+        progressBar.style.width = percentage + '%';
+        progressText.textContent = percentage.toFixed(1).replace('.', ',') + '%';
+        
+        // Adicionar classe de sucesso se atingir a meta
+        if (percentage >= 100) {
+            progressBar.style.background = 'linear-gradient(90deg, #f39c12 0%, #e67e22 100%)';
+            progressText.textContent = 'Meta Atingida!';
+        }
+    }
 }
 
 function filterNumbers() {
@@ -384,4 +423,43 @@ function formatPhone(phone) {
     }
     
     return phone;
+}
+
+
+// Função para copiar chave PIX
+function copyPixKey() {
+    const pixInput = document.getElementById('pixKey');
+    const copyBtn = document.getElementById('copyPixBtn');
+    const copyText = copyBtn.querySelector('.copy-text');
+    
+    // Selecionar e copiar o texto
+    pixInput.select();
+    pixInput.setSelectionRange(0, 99999); // Para mobile
+    
+    // Copiar para área de transferência
+    navigator.clipboard.writeText(pixInput.value).then(() => {
+        // Feedback visual
+        copyBtn.classList.add('copied');
+        copyText.textContent = 'Copiado!';
+        
+        // Voltar ao estado original após 2 segundos
+        setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyText.textContent = 'Copiar';
+        }, 2000);
+    }).catch(err => {
+        // Fallback para navegadores antigos
+        try {
+            document.execCommand('copy');
+            copyBtn.classList.add('copied');
+            copyText.textContent = 'Copiado!';
+            
+            setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                copyText.textContent = 'Copiar';
+            }, 2000);
+        } catch (e) {
+            alert('Não foi possível copiar. Por favor, copie manualmente.');
+        }
+    });
 }

@@ -33,6 +33,36 @@
             </div>
         </section>
 
+        <section class="goal-section">
+            <div class="goal-header">
+                <h3>Meta da Romaria</h3>
+                <div class="goal-values">
+                    <span class="current-value">R$ <span id="currentAmount">0,00</span></span>
+                    <span class="goal-separator">/</span>
+                    <span class="goal-value">R$ 1.000,00</span>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">
+                    <span class="progress-text" id="progressText">0%</span>
+                </div>
+            </div>
+            <p class="goal-info">Cada número vendido: R$ 5,00 | 3 números: R$ 10,00</p>
+        </section>
+
+        <section class="pix-section">
+            <h3>Pagamento via PIX</h3>
+            <p class="pix-description">Copie a chave PIX abaixo para fazer o pagamento:</p>
+            <div class="pix-container">
+                <input type="text" id="pixKey" value="f048ef86-6c7d-4f8a-b652-af94deb8daa4" readonly>
+                <button id="copyPixBtn" class="copy-btn">
+                    <span class="copy-icon">📋</span>
+                    <span class="copy-text">Copiar</span>
+                </button>
+            </div>
+            <p class="pix-info">Após o pagamento, envie o comprovante para confirmar sua participação.</p>
+        </section>
+
         <section class="stats-section">
             <div class="stat-card">
                 <span class="stat-number" id="totalNumbers">300</span>
