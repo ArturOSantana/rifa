@@ -7,7 +7,7 @@ Sistema web para gerenciamento de rifas com integração ao Google Sheets.
 - Visualização de números disponíveis e vendidos
 - Registro de vendas pelos vendedores
 - Integração automática com Google Sheets
-- Cálculo automático de valores (1 número = R$ 5,00 | 3 números = R$ 10,00)
+- Cálculo automático de valores (R$ 10,00 por número)
 - Barra de progresso da meta
 - Sistema de pagamento via PIX
 
@@ -47,9 +47,9 @@ A planilha deve ter as seguintes colunas na aba "Página1":
 
 ## 💰 Sistema de Preços
 
-- 1 número = R$ 5,00
-- 3 números = R$ 10,00 (promoção)
-- 6 números = R$ 20,00
+- Cada número = R$ 10,00
+- 2 números = R$ 20,00
+- 3 números = R$ 30,00
 - E assim por diante...
 
 ## 🔧 Tecnologias

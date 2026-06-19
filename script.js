@@ -3,9 +3,7 @@ const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tq
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfbEVwGlJEF7yY7NA8kuChbE7qE-e60yUiqdPWjnUSr1AbYruggJ1mSAO1J8ZWZpJL/exec';
 
 const GOAL_AMOUNT = 1000;
-const PRICE_PER_NUMBER = 5;
-const PROMO_PRICE = 10;
-const PROMO_QUANTITY = 3;
+const PRICE_PER_NUMBER = 10;
 
 let allNumbers = [];
 let currentFilter = 'all';
@@ -124,6 +122,7 @@ function processGoogleSheetsData(data) {
                 const nome = row.c[1] && row.c[1].v ? String(row.c[1].v) : '';
                 const telefone = row.c[2] && row.c[2].v ? String(row.c[2].v) : '';
                 const vendedor = row.c[3] && row.c[3].v ? String(row.c[3].v) : '';
+                const valor = row.c[4] && row.c[4].v ? parseFloat(row.c[4].v) : PRICE_PER_NUMBER;
                 
                 const hasName = nome.trim() !== '';
                 
@@ -133,7 +132,8 @@ function processGoogleSheetsData(data) {
                     buyer: nome,
                     buyerPhone: telefone,
                     seller: vendedor,
-                    sellerPhone: ''
+                    sellerPhone: '',
+                    price: valor
                 });
             }
         });
@@ -149,7 +149,8 @@ function processGoogleSheetsData(data) {
                 buyer: '',
                 buyerPhone: '',
                 seller: '',
-                sellerPhone: ''
+                sellerPhone: '',
+                price: PRICE_PER_NUMBER
             });
         }
     }
@@ -179,7 +180,8 @@ function loadExampleData() {
             buyer: isSold ? buyerNames[Math.floor(Math.random() * buyerNames.length)] : '',
             buyerPhone: isSold ? `119${Math.floor(Math.random() * 90000000) + 10000000}` : '',
             seller: isSold ? sellerNames[Math.floor(Math.random() * sellerNames.length)] : '',
-            sellerPhone: isSold ? `119${Math.floor(Math.random() * 90000000) + 10000000}` : ''
+            sellerPhone: isSold ? `119${Math.floor(Math.random() * 90000000) + 10000000}` : '',
+            price: isSold ? 5 : PRICE_PER_NUMBER
         });
     }
 
@@ -230,7 +232,9 @@ function updateStats() {
 }
 
 function updateGoalProgress(soldCount) {
-    const currentAmount = soldCount * PRICE_PER_NUMBER;
+    const currentAmount = allNumbers
+        .filter(n => n.status === 'sold')
+        .reduce((sum, n) => sum + (n.price || PRICE_PER_NUMBER), 0);
     const percentage = Math.min((currentAmount / GOAL_AMOUNT) * 100, 100);
     
     const currentAmountElement = document.getElementById('currentAmount');
@@ -504,9 +508,7 @@ function updateReserveSummary() {
     }
     
     const count = validNumbers.length;
-    const promoSets = Math.floor(count / 3);
-    const remaining = count % 3;
-    const total = (promoSets * PROMO_PRICE) + (remaining * PRICE_PER_NUMBER);
+    const total = count * PRICE_PER_NUMBER;
     
     totalNumbersElement.textContent = count;
     totalPriceElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
@@ -592,10 +594,15 @@ function handleReserveSubmit(e) {
         return;
     }
     
+    // Validar senha
+    const password = document.getElementById('sellerPassword').value.trim();
+    if (password !== '1911') {
+        alert('❌ Senha incorreta! A venda não pode ser confirmada.');
+        return;
+    }
+    
     const count = validNumbers.length;
-    const promoSets = Math.floor(count / 3); 
-    const remaining = count % 3; 
-    const totalValue = (promoSets * PROMO_PRICE) + (remaining * PRICE_PER_NUMBER);
+    const totalValue = count * PRICE_PER_NUMBER;
     
     saveReservation({
         numbers: validNumbers,
@@ -642,7 +649,8 @@ async function saveReservation(reservation) {
                 numbers: reservation.numbers,
                 buyer: reservation.buyer,
                 buyerPhone: reservation.buyerPhone,
-                seller: reservation.seller
+                seller: reservation.seller,
+                price: PRICE_PER_NUMBER
             })
         });
         
@@ -661,6 +669,7 @@ async function saveReservation(reservation) {
                     numberData.buyer = reservation.buyer;
                     numberData.buyerPhone = reservation.buyerPhone;
                     numberData.seller = reservation.seller;
+                    numberData.price = PRICE_PER_NUMBER;
                 }
             });
             
@@ -694,7 +703,12 @@ async function saveReservation(reservation) {
 function saveReservationLocally(reservation) {
     let reservations = JSON.parse(localStorage.getItem('rifaReservations') || '[]');
     
-    reservations.push(reservation);
+    const reservationWithPrice = {
+        ...reservation,
+        price: PRICE_PER_NUMBER
+    };
+    
+    reservations.push(reservationWithPrice);
     
     localStorage.setItem('rifaReservations', JSON.stringify(reservations));
     
@@ -705,6 +719,7 @@ function saveReservationLocally(reservation) {
             numberData.buyer = reservation.buyer;
             numberData.buyerPhone = reservation.buyerPhone;
             numberData.seller = reservation.seller;
+            numberData.price = PRICE_PER_NUMBER;
         }
     });
     
@@ -723,6 +738,7 @@ function loadLocalReservations() {
                 numberData.buyer = reservation.buyer;
                 numberData.buyerPhone = reservation.buyerPhone;
                 numberData.seller = reservation.seller;
+                numberData.price = reservation.price || PRICE_PER_NUMBER;
             }
         });
     });
@@ -735,6 +751,12 @@ function showReservationConfirmation(numbers, buyerName, sellerName, totalValue)
     const sellerNameElement = document.getElementById('confirmedSeller');
     const totalValueElement = document.getElementById('confirmedTotal');
     
+    if (!modal || !numbersList || !buyerNameElement || !sellerNameElement || !totalValueElement) {
+        console.error('Elementos do modal de confirmação não encontrados');
+        alert(`✅ Venda registrada com sucesso!\n\nNúmeros: ${numbers.join(', ')}\nComprador: ${buyerName}\nVendedor: ${sellerName}\nTotal: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nChave PIX: artursantana123@gmail.com`);
+        return;
+    }
+    
     numbersList.textContent = numbers.join(', ');
     buyerNameElement.textContent = buyerName;
     sellerNameElement.textContent = sellerName;
@@ -746,6 +768,44 @@ function showReservationConfirmation(numbers, buyerName, sellerName, totalValue)
 
 function closeConfirmationModal() {
     const modal = document.getElementById('confirmationModal');
-    modal.classList.remove('show');
-    document.body.style.overflow = '';
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+}
+
+function copyModalPix() {
+    const pixInput = document.getElementById('modalPixKey');
+    const copyBtn = document.getElementById('modalCopyPixBtn');
+    const copyText = copyBtn.querySelector('.copy-text');
+    
+    if (!pixInput || !copyBtn || !copyText) {
+        return;
+    }
+    
+    pixInput.select();
+    pixInput.setSelectionRange(0, 99999);
+    
+    navigator.clipboard.writeText(pixInput.value).then(() => {
+        copyBtn.classList.add('copied');
+        copyText.textContent = 'Copiado!';
+        
+        setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyText.textContent = 'Copiar';
+        }, 2000);
+    }).catch(err => {
+        try {
+            document.execCommand('copy');
+            copyBtn.classList.add('copied');
+            copyText.textContent = 'Copiado!';
+            
+            setTimeout(() => {
+                copyBtn.classList.remove('copied');
+                copyText.textContent = 'Copiar';
+            }, 2000);
+        } catch (e) {
+            alert('Não foi possível copiar. Por favor, copie manualmente.');
+        }
+    });
 }
