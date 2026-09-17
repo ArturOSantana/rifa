@@ -968,8 +968,10 @@ function openAdmEdit(number) {
 
 function closeAdmEdit() {
     document.getElementById('admEditModal').classList.remove('show');
-    // Mantém o painel ADM aberto
-    document.body.style.overflow = 'hidden';
+    // Mantém scroll bloqueado somente se o painel ainda estiver aberto
+    if (!document.getElementById('admPanelModal').classList.contains('show')) {
+        document.body.style.overflow = '';
+    }
 }
 
 function saveAdmEdit() {

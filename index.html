@@ -132,17 +132,17 @@
                 <!-- Os números serão inseridos aqui pelo JavaScript -->
             </div>
         </section>
-    </main>
 
-    <!-- Seção de Sorteio -->
-    <section class="raffle-section container">
-        <h3>🎲 Realizar Sorteio</h3>
-        <p class="raffle-description">Sorteia aleatoriamente um número entre os vendidos e exibe os dados do vencedor.</p>
-        <div class="raffle-password-group">
-            <input type="password" id="rafflePassword" placeholder="Senha de administrador" maxlength="20">
-            <button id="raffleBtn" onclick="openRaffleConfirm()">Sortear</button>
-        </div>
-    </section>
+        <!-- Seção de Sorteio -->
+        <section class="raffle-section">
+            <h3>🎲 Realizar Sorteio</h3>
+            <p class="raffle-description">Sorteia aleatoriamente um número entre os vendidos e exibe os dados do vencedor.</p>
+            <div class="raffle-password-group">
+                <input type="password" id="rafflePassword" placeholder="Senha de administrador" maxlength="20">
+                <button id="raffleBtn" onclick="openRaffleConfirm()">Sortear</button>
+            </div>
+        </section>
+    </main>
 
     <footer>
         <div class="container">
@@ -154,12 +154,12 @@
     <div id="raffleConfirmModal" class="modal">
         <div class="modal-content raffle-confirm-modal">
             <span class="modal-close" onclick="closeRaffleConfirm()">&times;</span>
-            <div class="modal-body" style="text-align:center;">
-                <h2>Confirmar Sorteio?</h2>
-                <p style="color:#57606a;margin:12px 0 24px;">Esta ação sorteará um número aleatório entre todos os vendidos. Deseja continuar?</p>
-                <div style="display:flex;gap:12px;justify-content:center;">
-                    <button class="close-modal-btn" style="background:#e5e7eb;color:#1f2328;" onclick="closeRaffleConfirm()">Cancelar</button>
-                    <button class="close-modal-btn" onclick="performRaffle()">Confirmar Sorteio</button>
+            <div class="modal-body raffle-confirm-body">
+                <h2 class="raffle-confirm-title">Confirmar Sorteio?</h2>
+                <p class="raffle-confirm-desc">Esta ação sorteará um número aleatório entre todos os vendidos. Deseja continuar?</p>
+                <div class="raffle-confirm-actions">
+                    <button class="raffle-cancel-btn" onclick="closeRaffleConfirm()">Cancelar</button>
+                    <button class="raffle-confirm-btn" onclick="performRaffle()">Confirmar Sorteio</button>
                 </div>
             </div>
         </div>
@@ -209,7 +209,7 @@
                     </div>
                 </div>
 
-                <button class="close-modal-btn" onclick="closeRaffleResult()" style="margin-top:20px;">Fechar</button>
+                <button class="close-modal-btn" onclick="closeRaffleResult()">Fechar</button>
             </div>
         </div>
     </div>

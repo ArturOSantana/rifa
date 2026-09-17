@@ -220,15 +220,27 @@ main {
 
 @media (max-width: 768px) {
     header h1 {
-        font-size: 20px;
+        font-size: 17px;
+        line-height: 1.3;
     }
 
     header .subtitle {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     header .destination {
-        font-size: 13px;
+        font-size: 12px;
+    }
+
+    .header-inner {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .adm-btn {
+        font-size: 11px;
+        padding: 7px 12px;
+        letter-spacing: 0.5px;
     }
 
     .search-box {
@@ -256,7 +268,17 @@ main {
     }
 
     header {
-        padding: 16px 0;
+        padding: 14px 0;
+    }
+
+    header h1 {
+        font-size: 15px;
+    }
+
+    .adm-btn {
+        font-size: 10px;
+        padding: 6px 10px;
+        min-height: 32px;
     }
 
     main {
@@ -1056,24 +1078,26 @@ input:focus-visible,
 /* Header com botão ADM */
 .header-inner {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
 }
 
 .adm-btn {
-    padding: 8px 18px;
+    padding: 8px 16px;
     background: rgba(255, 255, 255, 0.15);
     color: var(--white);
     border: 2px solid rgba(255, 255, 255, 0.6);
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
     flex-shrink: 0;
+    margin-top: 2px;
+    min-height: 36px;
 }
 
 .adm-btn:active,
@@ -1312,25 +1336,28 @@ input:focus-visible,
 
 /* ===== SEÇÃO DE SORTEIO ===== */
 .raffle-section {
-    background: #f7f8fa;
-    border: 1px solid #e5e7eb;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-left: 4px solid var(--primary-color);
     border-radius: 12px;
-    padding: 28px 24px;
-    margin: 24px auto;
+    padding: 24px 16px;
+    margin-bottom: 16px;
     text-align: center;
+    box-shadow: var(--shadow-sm);
 }
 
 .raffle-section h3 {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1f2328;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-900);
     margin-bottom: 8px;
 }
 
 .raffle-description {
-    color: #57606a;
+    color: var(--gray-600);
     font-size: 14px;
     margin-bottom: 20px;
+    line-height: 1.5;
 }
 
 .raffle-password-group {
@@ -1341,38 +1368,105 @@ input:focus-visible,
 }
 
 .raffle-password-group input {
-    padding: 10px 14px;
-    border: 1.5px solid #e5e7eb;
+    padding: 12px 14px;
+    border: 1px solid var(--gray-300);
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 16px;
+    font-family: inherit;
     width: 220px;
-    outline: none;
-    transition: border-color 0.2s;
+    background: var(--white);
+    transition: all 0.2s;
 }
 
 .raffle-password-group input:focus {
-    border-color: #3b82d4;
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 #raffleBtn {
-    padding: 10px 28px;
-    background: #3b82d4;
-    color: #fff;
+    padding: 12px 28px;
+    background: var(--primary-color);
+    color: var(--white);
     border: none;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
+    font-family: inherit;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
 }
 
 #raffleBtn:active {
-    background: #2563a8;
+    transform: scale(0.98);
+}
+
+/* Botões do modal de confirmação do sorteio */
+.raffle-cancel-btn {
+    padding: 12px 24px;
+    background: var(--gray-200);
+    color: var(--gray-900);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 110px;
+}
+
+.raffle-cancel-btn:active {
+    transform: scale(0.98);
+    background: var(--gray-300);
+}
+
+.raffle-confirm-btn {
+    padding: 12px 24px;
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 160px;
+}
+
+.raffle-confirm-btn:active {
+    transform: scale(0.98);
 }
 
 /* Modal de confirmação do sorteio */
 .raffle-confirm-modal {
     max-width: 400px;
+}
+
+.raffle-confirm-body {
+    text-align: center;
+}
+
+.raffle-confirm-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 10px 0;
+}
+
+.raffle-confirm-desc {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.raffle-confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 /* Modal de resultado do sorteio */
@@ -1389,13 +1483,13 @@ input:focus-visible,
 .raffle-result-title {
     font-size: 22px;
     font-weight: 700;
-    color: #1f2328;
+    color: var(--gray-900);
     margin-bottom: 20px;
 }
 
 /* Tambor de sorteio animado */
 .raffle-drum {
-    background: #1f2328;
+    background: var(--gray-900);
     color: #f9e94e;
     border-radius: 12px;
     padding: 18px 32px;
@@ -1425,8 +1519,8 @@ input:focus-visible,
 
 /* Card do vencedor */
 .raffle-winner-card {
-    background: #f7f8fa;
-    border: 1px solid #e5e7eb;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
     border-radius: 10px;
     padding: 20px 20px 16px;
     text-align: left;
@@ -1436,7 +1530,7 @@ input:focus-visible,
 .raffle-section-title {
     font-size: 15px;
     font-weight: 700;
-    color: #1f2328;
+    color: var(--gray-900);
     margin-bottom: 12px;
 }
 
@@ -1445,7 +1539,7 @@ input:focus-visible,
     justify-content: space-between;
     align-items: center;
     padding: 6px 0;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--gray-200);
     gap: 12px;
 }
 
@@ -1455,24 +1549,27 @@ input:focus-visible,
 
 .raffle-info-label {
     font-size: 13px;
-    color: #57606a;
+    color: var(--gray-600);
     white-space: nowrap;
 }
 
 .raffle-info-value {
     font-size: 14px;
     font-weight: 600;
-    color: #1f2328;
+    color: var(--gray-900);
     text-align: right;
 }
 
 .raffle-divider {
     border: none;
-    border-top: 1.5px dashed #e5e7eb;
+    border-top: 1.5px dashed var(--gray-300);
     margin: 16px 0;
 }
 
 @media (max-width: 480px) {
+    .raffle-password-group {
+        flex-direction: column;
+    }
     .raffle-password-group input {
         width: 100%;
     }
