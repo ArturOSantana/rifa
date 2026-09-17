@@ -1,0 +1,4 @@
+# Configurações sensíveis — nunca commitar
+config.js
+.env
+.env.local

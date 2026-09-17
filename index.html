@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rifa dos Jovens para a Jornada da Juventude</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- config.js deve ser carregado ANTES de script.js. Copie config.example.js → config.js -->
+    <script src="config.js"></script>
 </head>
 <body>
     <header>
         <div class="container header-inner">
             <div>
-                <h1>RIFA DOS JOVENS PARA A JORNADA DA JUVENTUDE</h1>
-                <p class="subtitle">SORTEIO DIA 30</p>
+                <h1 id="raffleTitleHeader">RIFA DOS JOVENS PARA A JORNADA DA JUVENTUDE</h1>
+                <p class="subtitle" id="raffleDateHeader">SORTEIO DIA 30</p>
             </div>
             <button id="admBtn" class="adm-btn">ADM</button>
         </div>
@@ -98,7 +100,7 @@
             <h3>Pagamento via PIX</h3>
             <p class="pix-description">Copie a chave PIX para pagamento:</p>
             <div class="pix-container">
-                <input type="text" id="pixKey" value="artursantana123@gmail.com" readonly>
+                <input type="text" id="pixKey" value="" readonly>
                 <button id="copyPixBtn" class="copy-btn">
                     <span class="copy-text">Copiar PIX</span>
                 </button>
@@ -133,10 +135,16 @@
             </div>
         </section>
 
+        <!-- Seção de Prêmios -->
+        <section class="prizes-section">
+            <h3>🏆 Prêmios</h3>
+            <ul id="prizesList" class="prizes-list"></ul>
+        </section>
+
         <!-- Seção de Sorteio -->
         <section class="raffle-section">
             <h3>🎲 Realizar Sorteio</h3>
-            <p class="raffle-description">Sorteia aleatoriamente um número entre os vendidos e exibe os dados do vencedor.</p>
+            <p class="raffle-description">Sorteia um número por prêmio, em ordem, entre os números vendidos.</p>
             <div class="raffle-password-group">
                 <input type="password" id="rafflePassword" placeholder="Senha de administrador" maxlength="20">
                 <button id="raffleBtn" onclick="openRaffleConfirm()">Sortear</button>
@@ -284,7 +292,7 @@
                 <div class="pix-payment-section">
                     <h3>Chave PIX para Pagamento</h3>
                     <div class="pix-container">
-                        <input type="text" id="modalPixKey" value="artursantana123@gmail.com" readonly>
+                        <input type="text" id="modalPixKey" value="" readonly>
                         <button id="modalCopyPixBtn" class="copy-btn" onclick="copyModalPix()">
                             <span class="copy-text">Copiar</span>
                         </button>
@@ -327,6 +335,9 @@
                     <input type="text" id="admSearch" placeholder="Buscar por número, comprador ou vendedor…">
                 </div>
                 <div id="admSalesList"></div>
+                <div class="adm-danger-zone">
+                    <button id="admClearAllBtn" class="adm-btn-clear-all">🗑️ Zerar tudo</button>
+                </div>
             </div>
         </div>
     </div>

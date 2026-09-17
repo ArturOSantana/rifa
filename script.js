@@ -1,9 +1,12 @@
-const SHEET_ID = '1QL9hka6P8SG_2un3JAsQWgs8mu7E44K3SXZOhTjF69k';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Página1`;
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfbEVwGlJEF7yY7NA8kuChbE7qE-e60yUiqdPWjnUSr1AbYruggJ1mSAO1J8ZWZpJL/exec';
+// Lê configurações do config.js (carregado antes deste script no index.html)
+if (typeof CONFIG === 'undefined') {
+    throw new Error('config.js não foi carregado. Copie config.example.js para config.js e preencha os valores.');
+}
 
-const GOAL_AMOUNT = 1000;
-const PRICE_PER_NUMBER = 10;
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=Página1`;
+const APPS_SCRIPT_URL = CONFIG.APPS_SCRIPT_URL;
+const GOAL_AMOUNT = CONFIG.GOAL_AMOUNT;
+const PRICE_PER_NUMBER = CONFIG.PRICE_PER_NUMBER;
 
 let allNumbers = [];
 let currentFilter = 'all';
@@ -13,12 +16,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
+    applyConfig();
     setupEventListeners();
     setupModalListeners();
     setupReserveForm();
     setupAdmPanel();
     loadNumbersFromSheet();
     loadLocalReservations();
+}
+
+/** Aplica os valores do CONFIG à interface (header, prêmios, chave PIX). */
+function applyConfig() {
+    // Header: nome e data da rifa
+    const titleEl = document.getElementById('raffleTitleHeader');
+    if (titleEl) titleEl.textContent = CONFIG.RAFFLE_NAME.toUpperCase();
+
+    const dateEl = document.getElementById('raffleDateHeader');
+    if (dateEl) dateEl.textContent = `SORTEIO DIA ${CONFIG.RAFFLE_DATE}`;
+
+    // Chave PIX em todos os campos
+    document.querySelectorAll('#pixKey, #modalPixKey').forEach(el => {
+        el.value = CONFIG.PIX_KEY;
+    });
+
+    // Seção de prêmios
+    const prizesList = document.getElementById('prizesList');
+    if (prizesList) {
+        prizesList.innerHTML = CONFIG.PRIZES.map((p, i) =>
+            `<li class="prize-item"><span class="prize-place">${p.place}</span><span class="prize-desc">${p.description}</span></li>`
+        ).join('');
+    }
 }
 
 function setupEventListeners() {
@@ -597,7 +624,7 @@ function handleReserveSubmit(e) {
     
     // Validar senha
     const password = document.getElementById('sellerPassword').value.trim();
-    if (password !== '2505') {
+    if (password !== CONFIG.SELLER_PASSWORD) {
         alert('❌ Senha incorreta! A venda não pode ser confirmada.');
         return;
     }
@@ -754,7 +781,7 @@ function showReservationConfirmation(numbers, buyerName, sellerName, totalValue)
     
     if (!modal || !numbersList || !buyerNameElement || !sellerNameElement || !totalValueElement) {
         console.error('Elementos do modal de confirmação não encontrados');
-        alert(`✅ Venda registrada com sucesso!\n\nNúmeros: ${numbers.join(', ')}\nComprador: ${buyerName}\nVendedor: ${sellerName}\nTotal: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nChave PIX: artursantana123@gmail.com`);
+        alert(`✅ Venda registrada com sucesso!\n\nNúmeros: ${numbers.join(', ')}\nComprador: ${buyerName}\nVendedor: ${sellerName}\nTotal: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nChave PIX: ${CONFIG.PIX_KEY}`);
         return;
     }
     
@@ -813,7 +840,7 @@ function copyModalPix() {
 
 // ===== PAINEL ADM =====
 
-const ADM_PASSWORD = '2505';
+const ADM_PASSWORD = CONFIG.ADM_PASSWORD;
 
 function setupAdmPanel() {
     // Botão ADM no header abre o login
@@ -849,6 +876,9 @@ function setupAdmPanel() {
 
     // Salvar edição
     document.getElementById('admSaveEditBtn').addEventListener('click', saveAdmEdit);
+
+    // Zerar tudo
+    document.getElementById('admClearAllBtn').addEventListener('click', admClearAll);
 }
 
 function openAdmLogin() {
@@ -1079,9 +1109,57 @@ async function syncDeleteToSheet(number) {
     }
 }
 
+function admClearAll() {
+    const soldCount = allNumbers.filter(n => n.status === 'sold').length;
+    if (soldCount === 0) {
+        alert('Não há vendas registradas para apagar.');
+        return;
+    }
+
+    const first = confirm(`⚠️ Tem certeza que deseja ZERAR TUDO?\n\nIsso irá apagar ${soldCount} venda(s) da planilha e do site.\n\nEsta ação não pode ser desfeita.`);
+    if (!first) return;
+
+    const second = confirm('🔴 CONFIRMAÇÃO FINAL\n\nTodos os dados serão permanentemente excluídos.\n\nClique em OK para confirmar.');
+    if (!second) return;
+
+    // Limpa memória
+    allNumbers.forEach(n => {
+        n.status = 'available';
+        n.buyer = '';
+        n.buyerPhone = '';
+        n.seller = '';
+        n.price = PRICE_PER_NUMBER;
+    });
+
+    // Limpa localStorage
+    localStorage.removeItem('rifaReservations');
+
+    // Sincroniza com a planilha
+    syncClearAllToSheet();
+
+    // Atualiza UI
+    renderNumbers();
+    updateStats();
+    renderAdmSummary();
+    renderAdmSalesList();
+}
+
+async function syncClearAllToSheet() {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
+    try {
+        await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'clearAll' })
+        });
+    } catch (e) {
+        console.warn('Não foi possível sincronizar limpeza total com a planilha:', e);
+    }
+}
+
 // ===== SORTEIO =====
 
-const RAFFLE_PASSWORD = '2505';
+const RAFFLE_PASSWORD = CONFIG.ADM_PASSWORD;
 
 function openRaffleConfirm() {
     const password = document.getElementById('rafflePassword').value.trim();
@@ -1114,19 +1192,42 @@ function closeRaffleConfirm() {
     document.body.style.overflow = '';
 }
 
+// Controle de estado do sorteio por múltiplos prêmios
+let _rafflePrizeIndex = 0;
+let _raffleWinnersExcluded = new Set(); // números já sorteados, excluídos dos próximos
+
 function performRaffle() {
     closeRaffleConfirm();
 
-    const soldNumbers = allNumbers.filter(n => n.status === 'sold');
-    if (soldNumbers.length === 0) return;
+    // Reinicia o ciclo a cada novo clique em "Sortear" (antes da animação inicial)
+    _rafflePrizeIndex = 0;
+    _raffleWinnersExcluded.clear();
 
-    // Sorteia o número vencedor usando índice aleatório criptograficamente seguro
+    _runNextPrizeDraw();
+}
+
+/**
+ * Sorteia o prêmio na posição _rafflePrizeIndex, excluindo números já premiados.
+ * Ao finalizar, exibe botão "Próximo Prêmio" se ainda houver prêmios restantes.
+ */
+function _runNextPrizeDraw() {
+    const prizes = CONFIG.PRIZES;
+    const currentPrize = prizes[_rafflePrizeIndex];
+
+    const pool = allNumbers.filter(n => n.status === 'sold' && !_raffleWinnersExcluded.has(n.number));
+    if (pool.length === 0) {
+        alert('Não há números disponíveis para sortear o próximo prêmio.');
+        return;
+    }
+
+    // Sorteio criptograficamente seguro
     const randomIndex = Math.floor(
-        (crypto.getRandomValues(new Uint32Array(1))[0] / (0xFFFFFFFF + 1)) * soldNumbers.length
+        (crypto.getRandomValues(new Uint32Array(1))[0] / (0xFFFFFFFF + 1)) * pool.length
     );
-    const winner = soldNumbers[randomIndex];
+    const winner = pool[randomIndex];
+    _raffleWinnersExcluded.add(winner.number);
 
-    // Calcula o maior vendedor
+    // Calcula o maior vendedor (sobre todos os vendidos, não muda por prêmio)
     const sellerMap = {};
     allNumbers.forEach(n => {
         if (n.status === 'sold' && n.seller) {
@@ -1134,17 +1235,13 @@ function performRaffle() {
             sellerMap[key] = (sellerMap[key] || 0) + 1;
         }
     });
-
     let topSeller = '';
     let topCount = 0;
     Object.entries(sellerMap).forEach(([name, count]) => {
-        if (count > topCount) {
-            topCount = count;
-            topSeller = name;
-        }
+        if (count > topCount) { topCount = count; topSeller = name; }
     });
 
-    // Abre o modal de resultado com animação
+    // Abre o modal de resultado
     const resultModal = document.getElementById('raffleResultModal');
     const drum = document.getElementById('raffleDrum');
     const drumNumber = document.getElementById('raffleDrumNumber');
@@ -1157,12 +1254,22 @@ function performRaffle() {
     resultModal.classList.add('show');
     document.body.style.overflow = 'hidden';
 
-    // Animação: troca números aleatórios por 2s, depois revela o sorteado
+    // Indicador de qual prêmio está sendo sorteado
+    let prizeBadge = document.getElementById('rafflePrizeBadge');
+    if (!prizeBadge) {
+        prizeBadge = document.createElement('div');
+        prizeBadge.id = 'rafflePrizeBadge';
+        prizeBadge.className = 'raffle-prize-badge';
+        drum.parentNode.insertBefore(prizeBadge, drum);
+    }
+    prizeBadge.innerHTML = `<span class="prize-place">${currentPrize.place}</span> — <span class="prize-desc">${currentPrize.description}</span>`;
+
+    // Animação de spin
     const spinDuration = 2000;
     const intervalMs = 80;
     const spinInterval = setInterval(() => {
-        const fakeIndex = Math.floor(Math.random() * soldNumbers.length);
-        drumNumber.textContent = soldNumbers[fakeIndex].number;
+        const fakeIndex = Math.floor(Math.random() * pool.length);
+        drumNumber.textContent = pool[fakeIndex].number;
     }, intervalMs);
 
     setTimeout(() => {
@@ -1182,7 +1289,25 @@ function performRaffle() {
 
         winnerCard.style.display = 'block';
 
-        // Limpa a senha após sorteio
+        // Botão "Próximo Prêmio" ou "Fechar"
+        const hasMore = _rafflePrizeIndex + 1 < prizes.length;
+        const closeBtn = document.querySelector('#raffleResultModal .close-modal-btn');
+        if (closeBtn) {
+            if (hasMore) {
+                closeBtn.textContent = `Próximo Prêmio (${prizes[_rafflePrizeIndex + 1].place})`;
+                closeBtn.onclick = () => {
+                    _rafflePrizeIndex++;
+                    winnerCard.style.display = 'none';
+                    drumNumber.textContent = '???';
+                    _runNextPrizeDraw();
+                };
+            } else {
+                closeBtn.textContent = 'Fechar';
+                closeBtn.onclick = closeRaffleResult;
+            }
+        }
+
+        // Limpa senha após o primeiro sorteio
         document.getElementById('rafflePassword').value = '';
     }, spinDuration);
 }
