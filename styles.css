@@ -1050,3 +1050,436 @@ input:focus-visible,
         font-size: 16px;
     }
 }
+
+/* ===== ADM ===== */
+
+/* Header com botão ADM */
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.adm-btn {
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--white);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.adm-btn:active,
+.adm-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+/* Login modal */
+.adm-login-content {
+    max-width: 360px;
+}
+
+.adm-login-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+.adm-login-desc {
+    font-size: 14px;
+    color: var(--gray-600);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.adm-login-error {
+    background: #fee2e2;
+    border: 1px solid var(--danger-color);
+    color: #991b1b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+/* Painel ADM */
+.adm-panel-content {
+    max-width: 680px;
+    width: 96%;
+    max-height: 90vh;
+}
+
+.adm-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 0 20px;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 14px;
+}
+
+.adm-panel-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.adm-panel-body {
+    padding-top: 16px;
+}
+
+.adm-summary {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.adm-summary-card {
+    flex: 1;
+    min-width: 120px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+}
+
+.adm-summary-card .adm-s-num {
+    display: block;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.adm-summary-card .adm-s-label {
+    font-size: 12px;
+    color: var(--gray-600);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.adm-search-row {
+    margin-bottom: 14px;
+}
+
+.adm-search-row input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--white);
+    transition: border-color 0.2s;
+}
+
+.adm-search-row input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Lista de vendas */
+.adm-sales-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 52vh;
+    overflow-y: auto;
+}
+
+.adm-sale-item {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.adm-sale-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.adm-sale-number {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.adm-sale-meta {
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.adm-sale-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.adm-btn-edit {
+    padding: 7px 14px;
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.adm-btn-edit:active { transform: scale(0.97); }
+
+.adm-btn-delete {
+    padding: 7px 14px;
+    background: var(--danger-color);
+    color: var(--white);
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.adm-btn-delete:active { transform: scale(0.97); }
+
+.adm-empty {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 14px;
+    padding: 32px 16px;
+}
+
+/* Edit modal */
+.adm-edit-content {
+    max-width: 400px;
+}
+
+.adm-edit-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 20px 0;
+}
+
+.adm-edit-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+    .adm-panel-content {
+        max-width: 100%;
+    }
+    .adm-sale-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .adm-sale-actions {
+        width: 100%;
+    }
+    .adm-btn-edit,
+    .adm-btn-delete {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* ===== SEÇÃO DE SORTEIO ===== */
+.raffle-section {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 28px 24px;
+    margin: 24px auto;
+    text-align: center;
+}
+
+.raffle-section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2328;
+    margin-bottom: 8px;
+}
+
+.raffle-description {
+    color: #57606a;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.raffle-password-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.raffle-password-group input {
+    padding: 10px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.raffle-password-group input:focus {
+    border-color: #3b82d4;
+}
+
+#raffleBtn {
+    padding: 10px 28px;
+    background: #3b82d4;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#raffleBtn:active {
+    background: #2563a8;
+}
+
+/* Modal de confirmação do sorteio */
+.raffle-confirm-modal {
+    max-width: 400px;
+}
+
+/* Modal de resultado do sorteio */
+.raffle-result-modal {
+    max-width: 480px;
+}
+
+.raffle-trophy {
+    font-size: 52px;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.raffle-result-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2328;
+    margin-bottom: 20px;
+}
+
+/* Tambor de sorteio animado */
+.raffle-drum {
+    background: #1f2328;
+    color: #f9e94e;
+    border-radius: 12px;
+    padding: 18px 32px;
+    display: inline-block;
+    margin: 0 auto 24px;
+    min-width: 140px;
+    text-align: center;
+}
+
+.raffle-drum span {
+    font-size: 42px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+    display: inline-block;
+}
+
+.raffle-drum.spinning span {
+    animation: drumSpin 0.08s linear infinite;
+}
+
+@keyframes drumSpin {
+    0%   { opacity: 1;   transform: translateY(0); }
+    50%  { opacity: 0.3; transform: translateY(-4px); }
+    100% { opacity: 1;   transform: translateY(0); }
+}
+
+/* Card do vencedor */
+.raffle-winner-card {
+    background: #f7f8fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px 20px 16px;
+    text-align: left;
+    margin-top: 4px;
+}
+
+.raffle-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2328;
+    margin-bottom: 12px;
+}
+
+.raffle-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #e5e7eb;
+    gap: 12px;
+}
+
+.raffle-info-row:last-child {
+    border-bottom: none;
+}
+
+.raffle-info-label {
+    font-size: 13px;
+    color: #57606a;
+    white-space: nowrap;
+}
+
+.raffle-info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2328;
+    text-align: right;
+}
+
+.raffle-divider {
+    border: none;
+    border-top: 1.5px dashed #e5e7eb;
+    margin: 16px 0;
+}
+
+@media (max-width: 480px) {
+    .raffle-password-group input {
+        width: 100%;
+    }
+    #raffleBtn {
+        width: 100%;
+    }
+    .raffle-drum span {
+        font-size: 34px;
+    }
+}

@@ -16,6 +16,7 @@ function initializeApp() {
     setupEventListeners();
     setupModalListeners();
     setupReserveForm();
+    setupAdmPanel();
     loadNumbersFromSheet();
     loadLocalReservations();
 }
@@ -322,7 +323,7 @@ setInterval(() => {
 
 function setupModalListeners() {
     const modal = document.getElementById('infoModal');
-    const closeBtn = document.querySelector('.modal-close');
+    const closeBtn = modal.querySelector('.modal-close');
 
     closeBtn.addEventListener('click', closeModal);
 
@@ -596,7 +597,7 @@ function handleReserveSubmit(e) {
     
     // Validar senha
     const password = document.getElementById('sellerPassword').value.trim();
-    if (password !== '1911') {
+    if (password !== '2505') {
         alert('❌ Senha incorreta! A venda não pode ser confirmada.');
         return;
     }
@@ -808,4 +809,384 @@ function copyModalPix() {
             alert('Não foi possível copiar. Por favor, copie manualmente.');
         }
     });
+}
+
+// ===== PAINEL ADM =====
+
+const ADM_PASSWORD = '2505';
+
+function setupAdmPanel() {
+    // Botão ADM no header abre o login
+    document.getElementById('admBtn').addEventListener('click', () => {
+        openAdmLogin();
+    });
+
+    // Fechar login
+    document.getElementById('admLoginClose').addEventListener('click', closeAdmLogin);
+
+    // Entrar no painel
+    document.getElementById('admLoginBtn').addEventListener('click', handleAdmLogin);
+    document.getElementById('admPassword').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleAdmLogin();
+    });
+
+    // Fechar painel
+    document.getElementById('admPanelClose').addEventListener('click', closeAdmPanel);
+
+    // Fechar modais clicando fora
+    window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('admLoginModal')) closeAdmLogin();
+        if (e.target === document.getElementById('admPanelModal')) closeAdmPanel();
+        if (e.target === document.getElementById('admEditModal')) closeAdmEdit();
+    });
+
+    // Busca no painel
+    document.getElementById('admSearch').addEventListener('input', renderAdmSalesList);
+
+    // Fechar edição
+    document.getElementById('admEditClose').addEventListener('click', closeAdmEdit);
+    document.getElementById('admCancelEditBtn').addEventListener('click', closeAdmEdit);
+
+    // Salvar edição
+    document.getElementById('admSaveEditBtn').addEventListener('click', saveAdmEdit);
+}
+
+function openAdmLogin() {
+    document.getElementById('admPassword').value = '';
+    document.getElementById('admLoginError').style.display = 'none';
+    document.getElementById('admLoginModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('admPassword').focus(), 100);
+}
+
+function closeAdmLogin() {
+    document.getElementById('admLoginModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function handleAdmLogin() {
+    const pwd = document.getElementById('admPassword').value.trim();
+    if (pwd === ADM_PASSWORD) {
+        closeAdmLogin();
+        openAdmPanel();
+    } else {
+        document.getElementById('admLoginError').style.display = 'block';
+        document.getElementById('admPassword').value = '';
+        document.getElementById('admPassword').focus();
+    }
+}
+
+function openAdmPanel() {
+    renderAdmSummary();
+    renderAdmSalesList();
+    document.getElementById('admSearch').value = '';
+    document.getElementById('admPanelModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAdmPanel() {
+    document.getElementById('admPanelModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function renderAdmSummary() {
+    const sold = allNumbers.filter(n => n.status === 'sold');
+    const total = allNumbers.length;
+    const totalArrecadado = sold.reduce((s, n) => s + (n.price || PRICE_PER_NUMBER), 0);
+
+    document.getElementById('admSummary').innerHTML = `
+        <div class="adm-summary-card">
+            <span class="adm-s-num">${total}</span>
+            <span class="adm-s-label">Total</span>
+        </div>
+        <div class="adm-summary-card">
+            <span class="adm-s-num" style="color:var(--success-color)">${sold.length}</span>
+            <span class="adm-s-label">Vendidos</span>
+        </div>
+        <div class="adm-summary-card">
+            <span class="adm-s-num" style="color:var(--danger-color)">${total - sold.length}</span>
+            <span class="adm-s-label">Disponíveis</span>
+        </div>
+        <div class="adm-summary-card">
+            <span class="adm-s-num" style="color:var(--success-color)">R$${totalArrecadado.toFixed(2).replace('.', ',')}</span>
+            <span class="adm-s-label">Arrecadado</span>
+        </div>
+    `;
+}
+
+function renderAdmSalesList() {
+    const query = (document.getElementById('admSearch').value || '').toLowerCase().trim();
+    const container = document.getElementById('admSalesList');
+
+    const soldNumbers = allNumbers.filter(n => n.status === 'sold');
+
+    const filtered = query
+        ? soldNumbers.filter(n =>
+            n.number.includes(query) ||
+            (n.buyer || '').toLowerCase().includes(query) ||
+            (n.seller || '').toLowerCase().includes(query)
+          )
+        : soldNumbers;
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="adm-empty">Nenhuma venda encontrada.</div>';
+        return;
+    }
+
+    const listHtml = filtered.map(n => `
+        <div class="adm-sale-item">
+            <div class="adm-sale-info">
+                <div class="adm-sale-number">Nº ${n.number}</div>
+                <div class="adm-sale-meta">
+                    Comprador: <strong>${n.buyer || '—'}</strong> · 
+                    Vendedor: <strong>${n.seller || '—'}</strong>
+                    ${n.buyerPhone ? ' · ' + formatPhone(n.buyerPhone) : ''}
+                </div>
+            </div>
+            <div class="adm-sale-actions">
+                <button class="adm-btn-edit" onclick="openAdmEdit('${n.number}')">Editar</button>
+                <button class="adm-btn-delete" onclick="admDeleteSale('${n.number}')">Apagar</button>
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = `<div class="adm-sales-list">${listHtml}</div>`;
+}
+
+function openAdmEdit(number) {
+    const numberData = allNumbers.find(n => n.number === number);
+    if (!numberData) return;
+
+    document.getElementById('editNumberKey').value = number;
+    document.getElementById('editBuyer').value = numberData.buyer || '';
+    document.getElementById('editBuyerPhone').value = numberData.buyerPhone || '';
+    document.getElementById('editSeller').value = numberData.seller || '';
+
+    document.getElementById('admEditModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAdmEdit() {
+    document.getElementById('admEditModal').classList.remove('show');
+    // Mantém o painel ADM aberto
+    document.body.style.overflow = 'hidden';
+}
+
+function saveAdmEdit() {
+    const number = document.getElementById('editNumberKey').value;
+    const numberData = allNumbers.find(n => n.number === number);
+    if (!numberData) return;
+
+    const newBuyer = document.getElementById('editBuyer').value.trim();
+    const newPhone = document.getElementById('editBuyerPhone').value.trim();
+    const newSeller = document.getElementById('editSeller').value.trim();
+
+    if (!newBuyer) {
+        alert('Por favor, informe o nome do comprador.');
+        return;
+    }
+
+    // Atualiza no array em memória
+    numberData.buyer = newBuyer;
+    numberData.buyerPhone = newPhone;
+    numberData.seller = newSeller;
+
+    // Atualiza no localStorage
+    updateLocalReservation(number, { buyer: newBuyer, buyerPhone: newPhone, seller: newSeller });
+
+    // Envia atualização para o Google Sheets
+    syncEditToSheet(number, newBuyer, newPhone, newSeller);
+
+    // Atualiza UI
+    renderNumbers();
+    updateStats();
+    closeAdmEdit();
+    renderAdmSummary();
+    renderAdmSalesList();
+}
+
+function admDeleteSale(number) {
+    if (!confirm(`Tem certeza que deseja apagar a venda do número ${number}?\n\nEsta ação não pode ser desfeita.`)) return;
+
+    const numberData = allNumbers.find(n => n.number === number);
+    if (!numberData) return;
+
+    // Marca como disponível na memória
+    numberData.status = 'available';
+    numberData.buyer = '';
+    numberData.buyerPhone = '';
+    numberData.seller = '';
+    numberData.price = PRICE_PER_NUMBER;
+
+    // Remove do localStorage
+    removeLocalReservation(number);
+
+    // Envia exclusão para o Google Sheets
+    syncDeleteToSheet(number);
+
+    // Atualiza UI
+    renderNumbers();
+    updateStats();
+    renderAdmSummary();
+    renderAdmSalesList();
+}
+
+function updateLocalReservation(number, fields) {
+    let reservations = JSON.parse(localStorage.getItem('rifaReservations') || '[]');
+    reservations = reservations.map(r => {
+        if (r.numbers && r.numbers.includes(number)) {
+            return { ...r, buyer: fields.buyer, buyerPhone: fields.buyerPhone, seller: fields.seller };
+        }
+        return r;
+    });
+    localStorage.setItem('rifaReservations', JSON.stringify(reservations));
+}
+
+function removeLocalReservation(number) {
+    let reservations = JSON.parse(localStorage.getItem('rifaReservations') || '[]');
+    // Remove o número da lista de cada reserva; remove a reserva inteira se ficar vazia
+    reservations = reservations
+        .map(r => ({ ...r, numbers: (r.numbers || []).filter(n => n !== number) }))
+        .filter(r => r.numbers && r.numbers.length > 0);
+    localStorage.setItem('rifaReservations', JSON.stringify(reservations));
+}
+
+async function syncEditToSheet(number, buyer, buyerPhone, seller) {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
+    try {
+        await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'edit', number, buyer, buyerPhone, seller })
+        });
+    } catch (e) {
+        console.warn('Não foi possível sincronizar edição com a planilha:', e);
+    }
+}
+
+async function syncDeleteToSheet(number) {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
+    try {
+        await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'delete', number })
+        });
+    } catch (e) {
+        console.warn('Não foi possível sincronizar exclusão com a planilha:', e);
+    }
+}
+
+// ===== SORTEIO =====
+
+const RAFFLE_PASSWORD = '2505';
+
+function openRaffleConfirm() {
+    const password = document.getElementById('rafflePassword').value.trim();
+
+    if (!password) {
+        alert('Digite a senha de administrador para realizar o sorteio.');
+        return;
+    }
+
+    if (password !== RAFFLE_PASSWORD) {
+        alert('❌ Senha incorreta! O sorteio não pode ser realizado.');
+        document.getElementById('rafflePassword').value = '';
+        return;
+    }
+
+    const soldNumbers = allNumbers.filter(n => n.status === 'sold');
+    if (soldNumbers.length === 0) {
+        alert('Nenhum número vendido ainda. O sorteio não pode ser realizado.');
+        return;
+    }
+
+    const modal = document.getElementById('raffleConfirmModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeRaffleConfirm() {
+    const modal = document.getElementById('raffleConfirmModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function performRaffle() {
+    closeRaffleConfirm();
+
+    const soldNumbers = allNumbers.filter(n => n.status === 'sold');
+    if (soldNumbers.length === 0) return;
+
+    // Sorteia o número vencedor usando índice aleatório criptograficamente seguro
+    const randomIndex = Math.floor(
+        (crypto.getRandomValues(new Uint32Array(1))[0] / (0xFFFFFFFF + 1)) * soldNumbers.length
+    );
+    const winner = soldNumbers[randomIndex];
+
+    // Calcula o maior vendedor
+    const sellerMap = {};
+    allNumbers.forEach(n => {
+        if (n.status === 'sold' && n.seller) {
+            const key = n.seller.trim();
+            sellerMap[key] = (sellerMap[key] || 0) + 1;
+        }
+    });
+
+    let topSeller = '';
+    let topCount = 0;
+    Object.entries(sellerMap).forEach(([name, count]) => {
+        if (count > topCount) {
+            topCount = count;
+            topSeller = name;
+        }
+    });
+
+    // Abre o modal de resultado com animação
+    const resultModal = document.getElementById('raffleResultModal');
+    const drum = document.getElementById('raffleDrum');
+    const drumNumber = document.getElementById('raffleDrumNumber');
+    const winnerCard = document.getElementById('raffleWinnerCard');
+
+    winnerCard.style.display = 'none';
+    drumNumber.textContent = '???';
+    drum.classList.add('spinning');
+
+    resultModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    // Animação: troca números aleatórios por 2s, depois revela o sorteado
+    const spinDuration = 2000;
+    const intervalMs = 80;
+    const spinInterval = setInterval(() => {
+        const fakeIndex = Math.floor(Math.random() * soldNumbers.length);
+        drumNumber.textContent = soldNumbers[fakeIndex].number;
+    }, intervalMs);
+
+    setTimeout(() => {
+        clearInterval(spinInterval);
+        drum.classList.remove('spinning');
+        drumNumber.textContent = winner.number;
+
+        // Preenche dados do vencedor
+        document.getElementById('raffleWinnerNumber').textContent = winner.number;
+        document.getElementById('raffleWinnerBuyer').textContent = winner.buyer || 'Não informado';
+        document.getElementById('raffleWinnerPhone').textContent = formatPhone(winner.buyerPhone) || 'Não informado';
+        document.getElementById('raffleWinnerSeller').textContent = winner.seller || 'Não informado';
+
+        document.getElementById('raffleTopSellerName').textContent = topSeller || 'Não identificado';
+        document.getElementById('raffleTopSellerCount').textContent =
+            topCount > 0 ? `${topCount} número${topCount > 1 ? 's' : ''}` : '-';
+
+        winnerCard.style.display = 'block';
+
+        // Limpa a senha após sorteio
+        document.getElementById('rafflePassword').value = '';
+    }, spinDuration);
+}
+
+function closeRaffleResult() {
+    const modal = document.getElementById('raffleResultModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
 }

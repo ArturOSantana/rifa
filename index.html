@@ -8,9 +8,12 @@
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1>RIFA DOS JOVENS PARA A JORNADA DA JUVENTUDE</h1>
-            <p class="subtitle">SORTEIO DIA 30</p>
+        <div class="container header-inner">
+            <div>
+                <h1>RIFA DOS JOVENS PARA A JORNADA DA JUVENTUDE</h1>
+                <p class="subtitle">SORTEIO DIA 30</p>
+            </div>
+            <button id="admBtn" class="adm-btn">ADM</button>
         </div>
     </header>
 
@@ -131,11 +134,85 @@
         </section>
     </main>
 
+    <!-- Seção de Sorteio -->
+    <section class="raffle-section container">
+        <h3>🎲 Realizar Sorteio</h3>
+        <p class="raffle-description">Sorteia aleatoriamente um número entre os vendidos e exibe os dados do vencedor.</p>
+        <div class="raffle-password-group">
+            <input type="password" id="rafflePassword" placeholder="Senha de administrador" maxlength="20">
+            <button id="raffleBtn" onclick="openRaffleConfirm()">Sortear</button>
+        </div>
+    </section>
+
     <footer>
         <div class="container">
             <p>&copy; 2024 Paróquia Santa Terezinha - Romaria dos Jovens</p>
         </div>
     </footer>
+
+    <!-- Modal de Confirmação do Sorteio -->
+    <div id="raffleConfirmModal" class="modal">
+        <div class="modal-content raffle-confirm-modal">
+            <span class="modal-close" onclick="closeRaffleConfirm()">&times;</span>
+            <div class="modal-body" style="text-align:center;">
+                <h2>Confirmar Sorteio?</h2>
+                <p style="color:#57606a;margin:12px 0 24px;">Esta ação sorteará um número aleatório entre todos os vendidos. Deseja continuar?</p>
+                <div style="display:flex;gap:12px;justify-content:center;">
+                    <button class="close-modal-btn" style="background:#e5e7eb;color:#1f2328;" onclick="closeRaffleConfirm()">Cancelar</button>
+                    <button class="close-modal-btn" onclick="performRaffle()">Confirmar Sorteio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultado do Sorteio -->
+    <div id="raffleResultModal" class="modal">
+        <div class="modal-content raffle-result-modal">
+            <span class="modal-close" onclick="closeRaffleResult()">&times;</span>
+            <div class="modal-body">
+                <div class="raffle-trophy">🏆</div>
+                <h2 class="raffle-result-title">Número Sorteado!</h2>
+
+                <div class="raffle-drum" id="raffleDrum">
+                    <span id="raffleDrumNumber">???</span>
+                </div>
+
+                <div id="raffleWinnerCard" class="raffle-winner-card" style="display:none;">
+                    <h3 class="raffle-section-title">🎉 Vencedor</h3>
+                    <div class="raffle-info-row">
+                        <span class="raffle-info-label">Número:</span>
+                        <span class="raffle-info-value" id="raffleWinnerNumber"></span>
+                    </div>
+                    <div class="raffle-info-row">
+                        <span class="raffle-info-label">Comprador:</span>
+                        <span class="raffle-info-value" id="raffleWinnerBuyer"></span>
+                    </div>
+                    <div class="raffle-info-row">
+                        <span class="raffle-info-label">WhatsApp:</span>
+                        <span class="raffle-info-value" id="raffleWinnerPhone"></span>
+                    </div>
+                    <div class="raffle-info-row">
+                        <span class="raffle-info-label">Vendido por:</span>
+                        <span class="raffle-info-value" id="raffleWinnerSeller"></span>
+                    </div>
+
+                    <div class="raffle-divider"></div>
+
+                    <h3 class="raffle-section-title">🥇 Maior Vendedor</h3>
+                    <div class="raffle-info-row">
+                        <span class="raffle-info-label">Nome:</span>
+                        <span class="raffle-info-value" id="raffleTopSellerName"></span>
+                    </div>
+                    <div class="raffle-info-row">
+                        <span class="raffle-info-label">Números vendidos:</span>
+                        <span class="raffle-info-value" id="raffleTopSellerCount"></span>
+                    </div>
+                </div>
+
+                <button class="close-modal-btn" onclick="closeRaffleResult()" style="margin-top:20px;">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal de Informações -->
     <div id="infoModal" class="modal">
@@ -216,6 +293,67 @@
                 </div>
 
                 <button class="close-modal-btn" onclick="closeConfirmationModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ADM - Login -->
+    <div id="admLoginModal" class="modal">
+        <div class="modal-content adm-login-content">
+            <span class="modal-close" id="admLoginClose">&times;</span>
+            <div class="modal-body">
+                <h2 class="adm-login-title">🔐 Área Administrativa</h2>
+                <p class="adm-login-desc">Digite a senha para acessar o painel de administração.</p>
+                <div class="form-group">
+                    <label for="admPassword">Senha</label>
+                    <input type="password" id="admPassword" placeholder="Digite a senha ADM" autocomplete="off">
+                </div>
+                <div id="admLoginError" class="adm-login-error" style="display:none;">Senha incorreta. Tente novamente.</div>
+                <button id="admLoginBtn" class="reserve-btn">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ADM - Painel -->
+    <div id="admPanelModal" class="modal">
+        <div class="modal-content adm-panel-content">
+            <div class="adm-panel-header">
+                <h2 class="adm-panel-title">⚙️ Painel ADM</h2>
+                <span class="modal-close" id="admPanelClose">&times;</span>
+            </div>
+            <div class="modal-body adm-panel-body">
+                <div class="adm-summary" id="admSummary"></div>
+                <div class="adm-search-row">
+                    <input type="text" id="admSearch" placeholder="Buscar por número, comprador ou vendedor…">
+                </div>
+                <div id="admSalesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ADM - Editar Venda -->
+    <div id="admEditModal" class="modal">
+        <div class="modal-content adm-edit-content">
+            <span class="modal-close" id="admEditClose">&times;</span>
+            <div class="modal-body">
+                <h2 class="adm-edit-title">✏️ Editar Venda</h2>
+                <input type="hidden" id="editNumberKey">
+                <div class="form-group">
+                    <label for="editBuyer">Comprador</label>
+                    <input type="text" id="editBuyer" placeholder="Nome do comprador">
+                </div>
+                <div class="form-group">
+                    <label for="editBuyerPhone">WhatsApp</label>
+                    <input type="tel" id="editBuyerPhone" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label for="editSeller">Vendedor</label>
+                    <input type="text" id="editSeller" placeholder="Nome do vendedor">
+                </div>
+                <div class="adm-edit-actions">
+                    <button id="admSaveEditBtn" class="reserve-btn">Salvar</button>
+                    <button id="admCancelEditBtn" class="close-modal-btn">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
