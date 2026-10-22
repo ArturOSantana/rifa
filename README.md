@@ -22,6 +22,16 @@ cp config.example.js config.js
 
 > Não publique nem envie o `config.js` ao repositório. Sem ele, o JavaScript do site não é inicializado e os botões não funcionam.
 
+### Publicação pelo GitHub Actions
+
+O workflow de publicação usa variáveis de repositório em **Settings > Secrets and variables > Actions > Variables**. Configure `PRIZES_JSON` como um array JSON válido, sem o nome da propriedade `PRIZES:`. Por exemplo:
+
+```json
+[{"place":"1º Lugar","description":"Smart TV 55 polegadas"},{"place":"2º Lugar","description":"Notebook Lenovo"}]
+```
+
+Use aspas duplas em chaves e textos, sem vírgula depois do último item. O workflow também aceita o prefixo opcional `PRIZES:` antes do array JSON; a sintaxe JavaScript do `config.example.js` (aspas simples ou chaves sem aspas) não é JSON válido.
+
 ## ⚙️ Informações da rifa no painel ADM
 
 Após entrar no painel **Administração**, edite nome, data, preço por número, meta, chave PIX e prêmios. Informe cada prêmio em uma linha no formato `posição | descrição` e salve.

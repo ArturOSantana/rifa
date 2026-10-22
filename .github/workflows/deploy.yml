@@ -65,6 +65,35 @@ jobs:
             }
           }
 
+          const prizesInput = process.env.PRIZES_JSON.trim();
+          const prizesJson = prizesInput.replace(/^PRIZES\s*:\s*/i, '');
+          let prizes;
+
+          try {
+            prizes = JSON.parse(prizesJson);
+          } catch (error) {
+            throw new Error(
+              'PRIZES_JSON deve ser um array JSON, por exemplo: ' +
+              '[{"place":"1º Lugar","description":"Descrição do prêmio"}]. ' +
+              'Não use sintaxe JavaScript, aspas simples ou vírgula final.',
+              { cause: error }
+            );
+          }
+
+          if (
+            !Array.isArray(prizes) ||
+            !prizes.every(prize =>
+              prize &&
+              typeof prize.place === 'string' &&
+              typeof prize.description === 'string'
+            )
+          ) {
+            throw new Error(
+              'PRIZES_JSON deve ser um array de objetos com os campos ' +
+              '"place" e "description", ambos textos.'
+            );
+          }
+
           const config = {
             SHEET_ID: process.env.SHEET_ID,
             APPS_SCRIPT_URL: process.env.APPS_SCRIPT_URL,
@@ -76,7 +105,7 @@ jobs:
             PIX_KEY: process.env.PIX_KEY,
             SELLER_PASSWORD: process.env.SELLER_PASSWORD,
             ADM_PASSWORD: process.env.ADM_PASSWORD,
-            PRIZES: JSON.parse(process.env.PRIZES_JSON)
+            PRIZES: prizes
           };
 
           fs.writeFileSync(
