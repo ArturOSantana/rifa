@@ -1,0 +1,95 @@
+name: Publicar no GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Gerar config.js
+        env:
+          SHEET_ID: ${{ vars.SHEET_ID }}
+          APPS_SCRIPT_URL: ${{ vars.APPS_SCRIPT_URL }}
+          RAFFLE_NAME: ${{ vars.RAFFLE_NAME }}
+          RAFFLE_DATE: ${{ vars.RAFFLE_DATE }}
+          RAFFLE_TOTAL_NUMBERS: ${{ vars.RAFFLE_TOTAL_NUMBERS }}
+          PRICE_PER_NUMBER: ${{ vars.PRICE_PER_NUMBER }}
+          GOAL_AMOUNT: ${{ vars.GOAL_AMOUNT }}
+          PIX_KEY: ${{ vars.PIX_KEY }}
+          PRIZES_JSON: ${{ vars.PRIZES_JSON }}
+          SELLER_PASSWORD: ${{ vars.SELLER_PASSWORD }}
+          ADM_PASSWORD: ${{ vars.ADM_PASSWORD }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          const required = [
+            'SHEET_ID',
+            'APPS_SCRIPT_URL',
+            'RAFFLE_NAME',
+            'RAFFLE_DATE',
+            'RAFFLE_TOTAL_NUMBERS',
+            'PRICE_PER_NUMBER',
+            'GOAL_AMOUNT',
+            'PIX_KEY',
+            'SELLER_PASSWORD',
+            'ADM_PASSWORD',
+            'PRIZES_JSON'
+          ];
+
+          for (const name of required) {
+            if (!process.env[name]) {
+              throw new Error(`Variável ausente no GitHub: ${name}`);
+            }
+          }
+
+          const config = {
+            SHEET_ID: process.env.SHEET_ID,
+            APPS_SCRIPT_URL: process.env.APPS_SCRIPT_URL,
+            RAFFLE_NAME: process.env.RAFFLE_NAME,
+            RAFFLE_DATE: process.env.RAFFLE_DATE,
+            RAFFLE_TOTAL_NUMBERS: Number(process.env.RAFFLE_TOTAL_NUMBERS),
+            PRICE_PER_NUMBER: Number(process.env.PRICE_PER_NUMBER),
+            GOAL_AMOUNT: Number(process.env.GOAL_AMOUNT),
+            PIX_KEY: process.env.PIX_KEY,
+            SELLER_PASSWORD: process.env.SELLER_PASSWORD,
+            ADM_PASSWORD: process.env.ADM_PASSWORD,
+            PRIZES: JSON.parse(process.env.PRIZES_JSON)
+          };
+
+          fs.writeFileSync(
+            'config.js',
+            `const CONFIG = ${JSON.stringify(config, null, 2)};\n`
+          );
+          NODE
+
+      - name: Preparar arquivos do site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Publicar
+        id: deployment
+        uses: actions/deploy-pages@v4

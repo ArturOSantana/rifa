@@ -295,31 +295,70 @@ function loadExampleData() {
 function renderNumbers() {
     const numbersGrid = document.getElementById('numbersGrid');
     const loadingMessage = document.getElementById('loadingMessage');
+    const selectedNumbers = getSelectedNumberSet();
     
     loadingMessage.style.display = 'none';
     numbersGrid.innerHTML = '';
 
     allNumbers.forEach(item => {
-        const numberCard = document.createElement('div');
+        const numberCard = document.createElement('button');
+        numberCard.type = 'button';
         numberCard.className = `number-card ${item.status}`;
+        if (selectedNumbers.has(item.number)) {
+            numberCard.classList.add('selected');
+        }
         numberCard.textContent = item.number;
         numberCard.dataset.number = item.number;
         numberCard.dataset.status = item.status;
 
         if (item.status === 'available') {
-            numberCard.title = `Número ${item.number} - Disponível - Clique para ver detalhes`;
+            numberCard.title = `Número ${item.number} - Disponível - Clique para selecionar`;
+            numberCard.setAttribute('aria-label', `Selecionar número ${item.number}`);
+            numberCard.setAttribute('aria-pressed', String(selectedNumbers.has(item.number)));
         } else {
             numberCard.title = `Número ${item.number} - Vendido - Clique para ver detalhes`;
+            numberCard.setAttribute('aria-label', `Ver detalhes do número vendido ${item.number}`);
         }
 
         numberCard.addEventListener('click', () => {
-            openModal(item);
+            if (item.status === 'available') {
+                toggleNumberSelection(item.number);
+            } else {
+                openModal(item);
+            }
         });
 
         numbersGrid.appendChild(numberCard);
     });
 
     filterNumbers();
+}
+
+function getSelectedNumberSet() {
+    const input = document.getElementById('selectedNumbers');
+    if (!input || !input.value.trim()) return new Set();
+
+    return new Set(
+        input.value
+            .split(',')
+            .map(number => number.trim())
+            .filter(Boolean)
+            .map(number => number.padStart(3, '0'))
+    );
+}
+
+function toggleNumberSelection(number) {
+    const input = document.getElementById('selectedNumbers');
+    const selectedNumbers = getSelectedNumberSet();
+
+    if (selectedNumbers.has(number)) {
+        selectedNumbers.delete(number);
+    } else {
+        selectedNumbers.add(number);
+    }
+
+    input.value = Array.from(selectedNumbers).join(', ');
+    updateReserveSummary();
 }
 
 function updateStats() {
@@ -557,6 +596,13 @@ function updateReserveSummary() {
     const selectedNumbersInput = document.getElementById('selectedNumbers');
     const totalNumbersElement = document.getElementById('totalNumbersSelected');
     const totalPriceElement = document.getElementById('totalPrice');
+    const selectedNumbers = getSelectedNumberSet();
+
+    document.querySelectorAll('.number-card.available').forEach(card => {
+        const isSelected = selectedNumbers.has(card.dataset.number);
+        card.classList.toggle('selected', isSelected);
+        card.setAttribute('aria-pressed', String(isSelected));
+    });
     
     const numbersText = selectedNumbersInput.value.trim();
     if (!numbersText) {

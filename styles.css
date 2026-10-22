@@ -167,6 +167,12 @@ main {
     min-height: 300px;
 }
 
+.number-selection-hint {
+    margin-bottom: 14px;
+    color: var(--gray-600);
+    font-size: 14px;
+}
+
 .loading, .error {
     text-align: center;
     padding: 40px 20px;
@@ -195,6 +201,8 @@ main {
     cursor: pointer;
     transition: all 0.2s;
     border: 2px solid transparent;
+    font-family: inherit;
+    padding: 0;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -205,6 +213,12 @@ main {
 
 .number-card.available:active {
     transform: scale(0.95);
+}
+
+.number-card.available.selected {
+    background: var(--primary-color);
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
 .number-card.sold {

@@ -59,6 +59,34 @@
             <p class="goal-info">Cada número vendido ajuda a chegar mais perto da meta.</p>
         </section>
 
+        <section class="stats-section">
+            <div class="stat-card">
+                <span class="stat-number" id="totalNumbers">300</span>
+                <span class="stat-label">Números</span>
+            </div>
+            <div class="stat-card available">
+                <span class="stat-number" id="availableNumbers">-</span>
+                <span class="stat-label">Livres</span>
+            </div>
+            <div class="stat-card sold">
+                <span class="stat-number" id="soldNumbers">-</span>
+                <span class="stat-label">Vendidos</span>
+            </div>
+        </section>
+
+        <section class="numbers-section">
+            <p class="number-selection-hint">Toque nos números livres para selecioná-los. Depois, preencha os dados da venda abaixo.</p>
+            <div id="loadingMessage" class="loading">
+                Carregando números...
+            </div>
+            <div id="errorMessage" class="error" style="display: none;">
+                Erro ao carregar os números. Tente novamente mais tarde.
+            </div>
+            <div id="numbersGrid" class="numbers-grid">
+                <!-- Os números serão inseridos aqui pelo JavaScript -->
+            </div>
+        </section>
+
         <section class="reserve-section">
             <div class="section-heading">
                 <div>
@@ -70,7 +98,7 @@
             <div class="price-alert">
                 <span><strong>R$ <span id="pricePerNumber">10,00</span></strong> por número</span>
             </div>
-            <p class="reserve-description">Preencha os dados do comprador e os números escolhidos. Os campos com * são obrigatórios.</p>
+            <p class="reserve-description">Informe seu nome como vendedor, os dados do comprador e os números escolhidos. Os campos com * são obrigatórios.</p>
             <form id="reserveForm" class="reserve-form">
                 <p class="form-step"><span>1</span> Quem está registrando?</p>
                 <div class="form-group form-group-wide">
@@ -88,9 +116,9 @@
                 </div>
                 <p class="form-step"><span>3</span> Números da sorte</p>
                 <div class="form-group form-group-wide">
-                    <label for="selectedNumbers">Quais números foram vendidos? *</label>
-                    <input type="text" id="selectedNumbers" required placeholder="Ex.: 001, 015, 123" inputmode="numeric" aria-describedby="numbersHint">
-                    <small id="numbersHint">Pode informar mais de um; separe por vírgula.</small>
+                    <label for="selectedNumbers">Números escolhidos *</label>
+                    <input type="text" id="selectedNumbers" required placeholder="Selecione na grade acima ou digite: 001, 015" inputmode="numeric" aria-describedby="numbersHint">
+                    <small id="numbersHint">Os números que você selecionou na grade aparecem aqui. Também pode digitá-los, separados por vírgula.</small>
                 </div>
                 <p class="form-step"><span>4</span> Confirme a venda</p>
                 <div class="form-group form-group-wide">
@@ -121,33 +149,6 @@
                 </button>
             </div>
             <p class="pix-info">Peça para enviar o comprovante após o pagamento.</p>
-        </section>
-
-        <section class="stats-section">
-            <div class="stat-card">
-                <span class="stat-number" id="totalNumbers">300</span>
-                <span class="stat-label">Números</span>
-            </div>
-            <div class="stat-card available">
-                <span class="stat-number" id="availableNumbers">-</span>
-                <span class="stat-label">Livres</span>
-            </div>
-            <div class="stat-card sold">
-                <span class="stat-number" id="soldNumbers">-</span>
-                <span class="stat-label">Vendidos</span>
-            </div>
-        </section>
-
-        <section class="numbers-section">
-            <div id="loadingMessage" class="loading">
-                Carregando números...
-            </div>
-            <div id="errorMessage" class="error" style="display: none;">
-                Erro ao carregar os números. Tente novamente mais tarde.
-            </div>
-            <div id="numbersGrid" class="numbers-grid">
-                <!-- Os números serão inseridos aqui pelo JavaScript -->
-            </div>
         </section>
 
         <!-- Seção de Prêmios -->
