@@ -7,26 +7,26 @@ Sistema web para gerenciamento de rifas com integração ao Google Sheets.
 - Visualização de números disponíveis e vendidos
 - Registro de vendas pelos vendedores
 - Integração automática com Google Sheets
-- Cálculo automático de valores (R$ 10,00 por número)
+- Cálculo automático do valor de acordo com o preço configurado por número
 - Barra de progresso da meta
 - Sistema de pagamento via PIX
 
 ## 📋 Configuração
 
-1. Configure o ID da sua planilha no arquivo `script.js`:
+1. Copie `config.example.js` para `config.js`. Esse arquivo é ignorado pelo Git para proteger suas configurações:
 ```javascript
-const SHEET_ID = 'SEU_ID_AQUI';
+cp config.example.js config.js
 ```
 
-2. Configure a URL do Google Apps Script no arquivo `script.js`:
-```javascript
-const APPS_SCRIPT_URL = 'SUA_URL_AQUI';
-```
+2. Preencha os valores reais em `config.js`, incluindo `SHEET_ID`, `APPS_SCRIPT_URL`, `PIX_KEY`, `SELLER_PASSWORD` e `ADM_PASSWORD`. O botão **Administração** só abre o painel após carregar esse arquivo e a senha configurada em `ADM_PASSWORD` ser informada.
 
-3. Configure sua chave PIX no arquivo `index.html`:
-```html
-<input type="text" id="pixKey" value="SUA_CHAVE_PIX" readonly>
-```
+> Não publique nem envie o `config.js` ao repositório. Sem ele, o JavaScript do site não é inicializado e os botões não funcionam.
+
+## ⚙️ Informações da rifa no painel ADM
+
+Após entrar no painel **Administração**, edite nome, data, preço por número, meta, chave PIX e prêmios. Informe cada prêmio em uma linha no formato `posição | descrição` e salve.
+
+As alterações ficam salvas no armazenamento local do navegador usado pelo administrador. Elas não são sincronizadas com outros dispositivos ou visitantes; para publicar as alterações para todos, é necessário implementar persistência de configurações no Apps Script.
 
 ## 📁 Estrutura da Planilha
 

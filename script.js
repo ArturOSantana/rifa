@@ -5,8 +5,10 @@ if (typeof CONFIG === 'undefined') {
 
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=Página1`;
 const APPS_SCRIPT_URL = CONFIG.APPS_SCRIPT_URL;
-const GOAL_AMOUNT = CONFIG.GOAL_AMOUNT;
-const PRICE_PER_NUMBER = CONFIG.PRICE_PER_NUMBER;
+const SETTINGS_STORAGE_KEY = 'rifaSettings';
+let raffleSettings;
+let GOAL_AMOUNT;
+let PRICE_PER_NUMBER;
 
 let allNumbers = [];
 let currentFilter = 'all';
@@ -16,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
+    raffleSettings = loadRaffleSettings();
+    GOAL_AMOUNT = raffleSettings.GOAL_AMOUNT;
+    PRICE_PER_NUMBER = raffleSettings.PRICE_PER_NUMBER;
     applyConfig();
     setupEventListeners();
     setupModalListeners();
@@ -25,27 +30,97 @@ function initializeApp() {
     loadLocalReservations();
 }
 
-/** Aplica os valores do CONFIG à interface (header, prêmios, chave PIX). */
+/** Aplica as configurações atuais à interface (header, prêmios e chave PIX). */
 function applyConfig() {
     // Header: nome e data da rifa
     const titleEl = document.getElementById('raffleTitleHeader');
-    if (titleEl) titleEl.textContent = CONFIG.RAFFLE_NAME.toUpperCase();
+    if (titleEl) titleEl.textContent = raffleSettings.RAFFLE_NAME.toUpperCase();
+    document.title = raffleSettings.RAFFLE_NAME;
 
     const dateEl = document.getElementById('raffleDateHeader');
-    if (dateEl) dateEl.textContent = `SORTEIO DIA ${CONFIG.RAFFLE_DATE}`;
+    if (dateEl) dateEl.textContent = `SORTEIO DIA ${raffleSettings.RAFFLE_DATE}`;
+
+    const goalTargetEl = document.getElementById('goalTarget');
+    if (goalTargetEl) {
+        goalTargetEl.textContent = `R$ ${GOAL_AMOUNT.toFixed(2).replace('.', ',')}`;
+    }
+
+    const pricePerNumberEl = document.getElementById('pricePerNumber');
+    if (pricePerNumberEl) {
+        pricePerNumberEl.textContent = PRICE_PER_NUMBER.toFixed(2).replace('.', ',');
+    }
 
     // Chave PIX em todos os campos
     document.querySelectorAll('#pixKey, #modalPixKey').forEach(el => {
-        el.value = CONFIG.PIX_KEY;
+        el.value = raffleSettings.PIX_KEY;
     });
 
     // Seção de prêmios
     const prizesList = document.getElementById('prizesList');
     if (prizesList) {
-        prizesList.innerHTML = CONFIG.PRIZES.map((p, i) =>
-            `<li class="prize-item"><span class="prize-place">${p.place}</span><span class="prize-desc">${p.description}</span></li>`
-        ).join('');
+        prizesList.replaceChildren();
+        raffleSettings.PRIZES.forEach(prize => {
+            const item = document.createElement('li');
+            item.className = 'prize-item';
+            const place = document.createElement('span');
+            place.className = 'prize-place';
+            place.textContent = prize.place;
+            const description = document.createElement('span');
+            description.className = 'prize-desc';
+            description.textContent = prize.description;
+            item.append(place, description);
+            prizesList.appendChild(item);
+        });
     }
+}
+
+function getDefaultRaffleSettings() {
+    return {
+        RAFFLE_NAME: CONFIG.RAFFLE_NAME,
+        RAFFLE_DATE: CONFIG.RAFFLE_DATE,
+        PRICE_PER_NUMBER: CONFIG.PRICE_PER_NUMBER,
+        GOAL_AMOUNT: CONFIG.GOAL_AMOUNT,
+        PIX_KEY: CONFIG.PIX_KEY,
+        PRIZES: CONFIG.PRIZES.map(prize => ({ ...prize }))
+    };
+}
+
+function isValidRaffleSettings(settings) {
+    return settings &&
+        typeof settings.RAFFLE_NAME === 'string' && settings.RAFFLE_NAME.trim().length > 0 && settings.RAFFLE_NAME.length <= 120 &&
+        typeof settings.RAFFLE_DATE === 'string' && settings.RAFFLE_DATE.trim().length > 0 && settings.RAFFLE_DATE.length <= 80 &&
+        typeof settings.PIX_KEY === 'string' && settings.PIX_KEY.length <= 200 &&
+        Number.isFinite(settings.PRICE_PER_NUMBER) && settings.PRICE_PER_NUMBER > 0 &&
+        Number.isFinite(settings.GOAL_AMOUNT) && settings.GOAL_AMOUNT > 0 &&
+        Array.isArray(settings.PRIZES) && settings.PRIZES.length > 0 &&
+        settings.PRIZES.every(prize =>
+            prize &&
+            typeof prize.place === 'string' && prize.place.trim().length > 0 && prize.place.length <= 80 &&
+            typeof prize.description === 'string' && prize.description.trim().length > 0 && prize.description.length <= 200
+        );
+}
+
+function loadRaffleSettings() {
+    const defaults = getDefaultRaffleSettings();
+    let savedSettings;
+
+    try {
+        const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
+        if (!saved) return defaults;
+        savedSettings = JSON.parse(saved);
+    } catch (error) {
+        console.error('Não foi possível carregar as configurações salvas da rifa:', error);
+        alert('As configurações salvas da rifa não puderam ser lidas. Serão usados os valores originais.');
+        return defaults;
+    }
+
+    const settings = { ...defaults, ...savedSettings };
+    if (!isValidRaffleSettings(settings)) {
+        console.error('As configurações salvas da rifa são inválidas.');
+        alert('As configurações salvas da rifa são inválidas. Serão usados os valores originais.');
+        return defaults;
+    }
+    return settings;
 }
 
 function setupEventListeners() {
@@ -518,17 +593,17 @@ function updateReserveSummary() {
         
         let message = '';
         if (soldNumbers.length > 0) {
-            message += `❌ Números já vendidos: ${soldNumbers.join(', ')}`;
+            message += `Números já vendidos: ${soldNumbers.join(', ')}`;
         }
         if (invalidNumbers.length > 0) {
-            if (message) message += '<br>';
-            message += `⚠️ Números inválidos: ${invalidNumbers.join(', ')}`;
+            if (message) message += '\n';
+            message += `Números inválidos: ${invalidNumbers.join(', ')}`;
         }
         showValidationMessage(message, 'error');
     } else if (validNumbers.length > 0) {
         selectedNumbersInput.style.borderColor = '#27ae60';
         selectedNumbersInput.style.backgroundColor = '#e8f8f0';
-        showValidationMessage(`✅ ${validNumbers.length} número(s) disponível(is)`, 'success');
+        showValidationMessage(`${validNumbers.length} número(s) disponível(is)`, 'success');
     } else {
         selectedNumbersInput.style.borderColor = '';
         selectedNumbersInput.style.backgroundColor = '';
@@ -549,7 +624,8 @@ function showValidationMessage(message, type) {
     const messageDiv = document.createElement('div');
     messageDiv.id = 'validationMessage';
     messageDiv.className = `validation-message ${type}`;
-    messageDiv.innerHTML = message;
+    messageDiv.textContent = message;
+    messageDiv.style.whiteSpace = 'pre-line';
     
     selectedNumbersInput.parentNode.appendChild(messageDiv);
 }
@@ -625,7 +701,7 @@ function handleReserveSubmit(e) {
     // Validar senha
     const password = document.getElementById('sellerPassword').value.trim();
     if (password !== CONFIG.SELLER_PASSWORD) {
-        alert('❌ Senha incorreta! A venda não pode ser confirmada.');
+        alert('Senha incorreta. A venda não pode ser confirmada.');
         return;
     }
     
@@ -649,7 +725,7 @@ function handleReserveSubmit(e) {
 
 async function saveReservation(reservation) {
     if (APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') {
-        alert('⚠️ Configure a URL do Google Apps Script primeiro!\n\nVeja o arquivo CONFIGURAR_APPS_SCRIPT.md para instruções.');
+        alert('Configure a URL do Google Apps Script primeiro.\n\nVeja o arquivo CONFIGURAR_APPS_SCRIPT.md para instruções.');
         
         saveReservationLocally(reservation);
         return;
@@ -688,7 +764,7 @@ async function saveReservation(reservation) {
         console.log('Resposta do servidor:', result);
         
         if (response.ok) {
-            console.log('✅ Dados salvos com sucesso na planilha!');
+            console.log('Dados salvos com sucesso na planilha.');
             
             reservation.numbers.forEach(num => {
                 const numberData = allNumbers.find(n => n.number === num);
@@ -715,14 +791,14 @@ async function saveReservation(reservation) {
         }
         
     } catch (error) {
-        console.error('❌ Erro ao salvar reserva:', error);
+        console.error('Erro ao salvar reserva:', error);
         
         const loadingDiv = document.querySelector('.loading-overlay');
         if (loadingDiv) {
             document.body.removeChild(loadingDiv);
         }
         
-        alert('⚠️ Erro ao salvar na planilha.\n\nVerifique:\n1. Se o Apps Script está implantado corretamente\n2. Se a URL está correta\n3. O console do navegador (F12) para mais detalhes\n\nOs dados foram salvos localmente como backup.');
+        alert('Erro ao salvar na planilha.\n\nVerifique:\n1. Se o Apps Script está implantado corretamente\n2. Se a URL está correta\n3. O console do navegador (F12) para mais detalhes\n\nOs dados foram salvos localmente como backup.');
         
         saveReservationLocally(reservation);
     }
@@ -781,7 +857,7 @@ function showReservationConfirmation(numbers, buyerName, sellerName, totalValue)
     
     if (!modal || !numbersList || !buyerNameElement || !sellerNameElement || !totalValueElement) {
         console.error('Elementos do modal de confirmação não encontrados');
-        alert(`✅ Venda registrada com sucesso!\n\nNúmeros: ${numbers.join(', ')}\nComprador: ${buyerName}\nVendedor: ${sellerName}\nTotal: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nChave PIX: ${CONFIG.PIX_KEY}`);
+        alert(`Venda registrada com sucesso!\n\nNúmeros: ${numbers.join(', ')}\nComprador: ${buyerName}\nVendedor: ${sellerName}\nTotal: R$ ${totalValue.toFixed(2).replace('.', ',')}\n\nChave PIX: ${raffleSettings.PIX_KEY}`);
         return;
     }
     
@@ -877,6 +953,8 @@ function setupAdmPanel() {
     // Salvar edição
     document.getElementById('admSaveEditBtn').addEventListener('click', saveAdmEdit);
 
+    document.getElementById('admSettingsForm').addEventListener('submit', saveAdmSettings);
+
     // Zerar tudo
     document.getElementById('admClearAllBtn').addEventListener('click', admClearAll);
 }
@@ -907,11 +985,66 @@ function handleAdmLogin() {
 }
 
 function openAdmPanel() {
+    populateAdmSettingsForm();
     renderAdmSummary();
     renderAdmSalesList();
     document.getElementById('admSearch').value = '';
     document.getElementById('admPanelModal').classList.add('show');
     document.body.style.overflow = 'hidden';
+}
+
+function populateAdmSettingsForm() {
+    document.getElementById('admRaffleName').value = raffleSettings.RAFFLE_NAME;
+    document.getElementById('admRaffleDate').value = raffleSettings.RAFFLE_DATE;
+    document.getElementById('admPricePerNumber').value = raffleSettings.PRICE_PER_NUMBER;
+    document.getElementById('admGoalAmount').value = raffleSettings.GOAL_AMOUNT;
+    document.getElementById('admPixKey').value = raffleSettings.PIX_KEY;
+    document.getElementById('admPrizes').value = raffleSettings.PRIZES
+        .map(prize => `${prize.place} | ${prize.description}`)
+        .join('\n');
+}
+
+function saveAdmSettings(event) {
+    event.preventDefault();
+
+    const prizeLines = document.getElementById('admPrizes').value
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean);
+    const prizes = prizeLines.map(line => {
+        const parts = line.split('|').map(part => part.trim());
+        return parts.length === 2 ? { place: parts[0], description: parts[1] } : null;
+    });
+
+    const settings = {
+        RAFFLE_NAME: document.getElementById('admRaffleName').value.trim(),
+        RAFFLE_DATE: document.getElementById('admRaffleDate').value.trim(),
+        PRICE_PER_NUMBER: Number(document.getElementById('admPricePerNumber').value),
+        GOAL_AMOUNT: Number(document.getElementById('admGoalAmount').value),
+        PIX_KEY: document.getElementById('admPixKey').value.trim(),
+        PRIZES: prizes
+    };
+
+    if (prizes.some(prize => !prize) || !isValidRaffleSettings(settings)) {
+        alert('Revise os dados: informe nome e data, valores positivos e cada prêmio no formato "posição | descrição".');
+        return;
+    }
+
+    try {
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    } catch (error) {
+        console.error('Não foi possível salvar as configurações da rifa:', error);
+        alert('Não foi possível salvar as configurações neste navegador. Verifique o armazenamento disponível.');
+        return;
+    }
+
+    raffleSettings = settings;
+    GOAL_AMOUNT = settings.GOAL_AMOUNT;
+    PRICE_PER_NUMBER = settings.PRICE_PER_NUMBER;
+    applyConfig();
+    updateReserveSummary();
+    updateStats();
+    alert('Informações da rifa atualizadas neste navegador. Para publicar as mudanças para todos, é necessário configurar a sincronização no servidor.');
 }
 
 function closeAdmPanel() {
@@ -959,28 +1092,52 @@ function renderAdmSalesList() {
         : soldNumbers;
 
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="adm-empty">Nenhuma venda encontrada.</div>';
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'adm-empty';
+        emptyMessage.textContent = 'Nenhuma venda encontrada.';
+        container.replaceChildren(emptyMessage);
         return;
     }
 
-    const listHtml = filtered.map(n => `
-        <div class="adm-sale-item">
-            <div class="adm-sale-info">
-                <div class="adm-sale-number">Nº ${n.number}</div>
-                <div class="adm-sale-meta">
-                    Comprador: <strong>${n.buyer || '—'}</strong> · 
-                    Vendedor: <strong>${n.seller || '—'}</strong>
-                    ${n.buyerPhone ? ' · ' + formatPhone(n.buyerPhone) : ''}
-                </div>
-            </div>
-            <div class="adm-sale-actions">
-                <button class="adm-btn-edit" onclick="openAdmEdit('${n.number}')">Editar</button>
-                <button class="adm-btn-delete" onclick="admDeleteSale('${n.number}')">Apagar</button>
-            </div>
-        </div>
-    `).join('');
+    const list = document.createElement('div');
+    list.className = 'adm-sales-list';
+    filtered.forEach(numberData => {
+        const item = document.createElement('div');
+        item.className = 'adm-sale-item';
+        const info = document.createElement('div');
+        info.className = 'adm-sale-info';
+        const number = document.createElement('div');
+        number.className = 'adm-sale-number';
+        number.textContent = `Nº ${numberData.number}`;
+        const meta = document.createElement('div');
+        meta.className = 'adm-sale-meta';
+        meta.append('Comprador: ');
+        const buyer = document.createElement('strong');
+        buyer.textContent = numberData.buyer || '—';
+        meta.append(buyer, ' · Vendedor: ');
+        const seller = document.createElement('strong');
+        seller.textContent = numberData.seller || '—';
+        meta.append(seller);
+        if (numberData.buyerPhone) {
+            meta.append(` · ${formatPhone(numberData.buyerPhone)}`);
+        }
+        info.append(number, meta);
 
-    container.innerHTML = `<div class="adm-sales-list">${listHtml}</div>`;
+        const actions = document.createElement('div');
+        actions.className = 'adm-sale-actions';
+        const editButton = document.createElement('button');
+        editButton.className = 'adm-btn-edit';
+        editButton.textContent = 'Editar';
+        editButton.addEventListener('click', () => openAdmEdit(numberData.number));
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'adm-btn-delete';
+        deleteButton.textContent = 'Apagar';
+        deleteButton.addEventListener('click', () => admDeleteSale(numberData.number));
+        actions.append(editButton, deleteButton);
+        item.append(info, actions);
+        list.appendChild(item);
+    });
+    container.replaceChildren(list);
 }
 
 function openAdmEdit(number) {
@@ -1116,10 +1273,10 @@ function admClearAll() {
         return;
     }
 
-    const first = confirm(`⚠️ Tem certeza que deseja ZERAR TUDO?\n\nIsso irá apagar ${soldCount} venda(s) da planilha e do site.\n\nEsta ação não pode ser desfeita.`);
+    const first = confirm(`Tem certeza que deseja ZERAR TUDO?\n\nIsso irá apagar ${soldCount} venda(s) da planilha e do site.\n\nEsta ação não pode ser desfeita.`);
     if (!first) return;
 
-    const second = confirm('🔴 CONFIRMAÇÃO FINAL\n\nTodos os dados serão permanentemente excluídos.\n\nClique em OK para confirmar.');
+    const second = confirm('CONFIRMAÇÃO FINAL\n\nTodos os dados serão permanentemente excluídos.\n\nClique em OK para confirmar.');
     if (!second) return;
 
     // Limpa memória
@@ -1170,7 +1327,7 @@ function openRaffleConfirm() {
     }
 
     if (password !== RAFFLE_PASSWORD) {
-        alert('❌ Senha incorreta! O sorteio não pode ser realizado.');
+        alert('Senha incorreta. O sorteio não pode ser realizado.');
         document.getElementById('rafflePassword').value = '';
         return;
     }
@@ -1211,7 +1368,7 @@ function performRaffle() {
  * Ao finalizar, exibe botão "Próximo Prêmio" se ainda houver prêmios restantes.
  */
 function _runNextPrizeDraw() {
-    const prizes = CONFIG.PRIZES;
+    const prizes = raffleSettings.PRIZES;
     const currentPrize = prizes[_rafflePrizeIndex];
 
     const pool = allNumbers.filter(n => n.status === 'sold' && !_raffleWinnersExcluded.has(n.number));
@@ -1262,7 +1419,13 @@ function _runNextPrizeDraw() {
         prizeBadge.className = 'raffle-prize-badge';
         drum.parentNode.insertBefore(prizeBadge, drum);
     }
-    prizeBadge.innerHTML = `<span class="prize-place">${currentPrize.place}</span> — <span class="prize-desc">${currentPrize.description}</span>`;
+    const prizePlace = document.createElement('span');
+    prizePlace.className = 'prize-place';
+    prizePlace.textContent = currentPrize.place;
+    const prizeDescription = document.createElement('span');
+    prizeDescription.className = 'prize-desc';
+    prizeDescription.textContent = currentPrize.description;
+    prizeBadge.replaceChildren(prizePlace, document.createTextNode(' — '), prizeDescription);
 
     // Animação de spin
     const spinDuration = 2000;

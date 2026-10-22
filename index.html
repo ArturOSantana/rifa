@@ -9,41 +9,45 @@
     <script src="config.js"></script>
 </head>
 <body>
-    <header>
+    <header class="site-header">
         <div class="container header-inner">
-            <div>
+            <div class="header-copy">
+                <p class="eyebrow">Uma chance de ganhar e ajudar</p>
                 <h1 id="raffleTitleHeader">RIFA DOS JOVENS PARA A JORNADA DA JUVENTUDE</h1>
                 <p class="subtitle" id="raffleDateHeader">SORTEIO DIA 30</p>
             </div>
-            <button id="admBtn" class="adm-btn">ADM</button>
+            <button id="admBtn" class="adm-btn">Administração</button>
         </div>
     </header>
 
     <main class="container">
         <section class="info-section">
-            <h2>Números Disponíveis</h2>
-            <p>Confira os números da rifa disponíveis para compra.</p>
+            <div>
+                <p class="section-kicker">ESCOLHA O SEU</p>
+                <h2>Números da sorte</h2>
+                <p>Encontre um número livre e participe. Boa sorte!</p>
+            </div>
         </section>
 
         <section class="filter-section">
             <div class="search-box">
-                <input type="text" id="searchNumber" placeholder="Buscar número específico (ex: 001)" maxlength="3">
-                <button id="searchBtn">Buscar</button>
+                <input type="text" id="searchNumber" placeholder="Procurar número (ex.: 001)" maxlength="3" aria-label="Procurar número">
+                <button id="searchBtn">Procurar</button>
             </div>
             <div class="filter-buttons">
                 <button class="filter-btn active" data-filter="all">Todos</button>
-                <button class="filter-btn" data-filter="available">Disponíveis</button>
+                <button class="filter-btn" data-filter="available">Livres</button>
                 <button class="filter-btn" data-filter="sold">Vendidos</button>
             </div>
         </section>
 
         <section class="goal-section">
             <div class="goal-header">
-                <h3>Meta para a Jornada</h3>
+                <h3>Juntos rumo à Jornada</h3>
                 <div class="goal-values">
                     <span class="current-value">R$ <span id="currentAmount">0,00</span></span>
                     <span class="goal-separator">/</span>
-                    <span class="goal-value">R$ 1.000,00</span>
+                    <span class="goal-value" id="goalTarget">R$ 1.000,00</span>
                 </div>
             </div>
             <div class="progress-bar-container">
@@ -51,71 +55,81 @@
                     <span class="progress-text" id="progressText">0%</span>
                 </div>
             </div>
-            <p class="goal-info">R$ 10,00 cada</p>
+            <p class="goal-info">Cada número vendido ajuda a chegar mais perto da meta.</p>
         </section>
 
         <section class="reserve-section">
-            <h3>Registrar Venda</h3>
-            <div class="price-alert">
-                <strong>Valores:</strong> R$ 10,00 cada
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">ÁREA DO VENDEDOR</p>
+                    <h3>Registrar uma venda</h3>
+                </div>
+                <span class="heading-sticker">É rapidinho!</span>
             </div>
-            <p class="reserve-description">Vendedores: preencha os dados abaixo para registrar a venda:</p>
+            <div class="price-alert">
+                <span><strong>R$ <span id="pricePerNumber">10,00</span></strong> por número</span>
+            </div>
+            <p class="reserve-description">Preencha os dados do comprador e os números escolhidos. Os campos com * são obrigatórios.</p>
             <form id="reserveForm" class="reserve-form">
+                <p class="form-step"><span>1</span> Quem está registrando?</p>
+                <div class="form-group form-group-wide">
+                    <label for="sellerName">Seu nome (vendedor) *</label>
+                    <input type="text" id="sellerName" required placeholder="Como podemos te chamar?">
+                </div>
+                <p class="form-step"><span>2</span> Dados de quem comprou</p>
                 <div class="form-group">
-                    <label for="sellerName">Vendedor *</label>
-                    <input type="text" id="sellerName" required placeholder="Seu nome">
+                    <label for="buyerName">Nome do comprador *</label>
+                    <input type="text" id="buyerName" required placeholder="Nome e sobrenome">
                 </div>
                 <div class="form-group">
-                    <label for="buyerName">Comprador *</label>
-                    <input type="text" id="buyerName" required placeholder="Nome do comprador">
+                    <label for="buyerPhone">WhatsApp do comprador *</label>
+                    <input type="tel" id="buyerPhone" required placeholder="(00) 00000-0000" autocomplete="tel">
                 </div>
-                <div class="form-group">
-                    <label for="buyerPhone">WhatsApp *</label>
-                    <input type="tel" id="buyerPhone" required placeholder="(00) 00000-0000">
+                <p class="form-step"><span>3</span> Números da sorte</p>
+                <div class="form-group form-group-wide">
+                    <label for="selectedNumbers">Quais números foram vendidos? *</label>
+                    <input type="text" id="selectedNumbers" required placeholder="Ex.: 001, 015, 123" inputmode="numeric" aria-describedby="numbersHint">
+                    <small id="numbersHint">Pode informar mais de um; separe por vírgula.</small>
                 </div>
-                <div class="form-group">
-                    <label for="selectedNumbers">Números *</label>
-                    <input type="text" id="selectedNumbers" required placeholder="Ex: 001, 015, 123">
-                    <small>Separe os números por vírgula</small>
-                </div>
-                <div class="form-group">
-                    <label for="sellerPassword">Senha de Confirmação *</label>
+                <p class="form-step"><span>4</span> Confirme a venda</p>
+                <div class="form-group form-group-wide">
+                    <label for="sellerPassword">Senha de confirmação *</label>
                     <input
                         type="password"
                         id="sellerPassword"
                         name="sellerPassword"
-                        placeholder="Digite a senha para confirmar a venda"
+                        placeholder="Digite a senha dos vendedores"
                         required
                     >
                 </div>
                 <div class="form-summary">
-                    <p>Total de números: <strong id="totalNumbersSelected">0</strong></p>
-                    <p>Valor total: <strong id="totalPrice">R$ 0,00</strong></p>
+                    <p>Números selecionados <strong id="totalNumbersSelected">0</strong></p>
+                    <p>Total da venda <strong id="totalPrice">R$ 0,00</strong></p>
                 </div>
-                <button type="submit" class="reserve-btn">Registrar Venda</button>
+                <button type="submit" class="reserve-btn">Confirmar e registrar venda</button>
             </form>
         </section>
 
         <section class="pix-section">
             <h3>Pagamento via PIX</h3>
-            <p class="pix-description">Copie a chave PIX para pagamento:</p>
+            <p class="pix-description">Copie a chave e envie para o comprador fazer o pagamento.</p>
             <div class="pix-container">
-                <input type="text" id="pixKey" value="" readonly>
+                <input type="text" id="pixKey" value="" readonly aria-label="Chave PIX">
                 <button id="copyPixBtn" class="copy-btn">
                     <span class="copy-text">Copiar PIX</span>
                 </button>
             </div>
-            <p class="pix-info">Envie o comprovante após o pagamento.</p>
+            <p class="pix-info">Peça para enviar o comprovante após o pagamento.</p>
         </section>
 
         <section class="stats-section">
             <div class="stat-card">
                 <span class="stat-number" id="totalNumbers">300</span>
-                <span class="stat-label">Total</span>
+                <span class="stat-label">Números</span>
             </div>
             <div class="stat-card available">
                 <span class="stat-number" id="availableNumbers">-</span>
-                <span class="stat-label">Disponíveis</span>
+                <span class="stat-label">Livres</span>
             </div>
             <div class="stat-card sold">
                 <span class="stat-number" id="soldNumbers">-</span>
@@ -137,14 +151,14 @@
 
         <!-- Seção de Prêmios -->
         <section class="prizes-section">
-            <h3>🏆 Prêmios</h3>
+            <h3>Olha só o que você pode ganhar!</h3>
             <ul id="prizesList" class="prizes-list"></ul>
         </section>
 
         <!-- Seção de Sorteio -->
         <section class="raffle-section">
-            <h3>🎲 Realizar Sorteio</h3>
-            <p class="raffle-description">Sorteia um número por prêmio, em ordem, entre os números vendidos.</p>
+            <h3>Área do sorteio</h3>
+            <p class="raffle-description">Acesso restrito à organização. O sorteio seleciona um número vendido por prêmio.</p>
             <div class="raffle-password-group">
                 <input type="password" id="rafflePassword" placeholder="Senha de administrador" maxlength="20">
                 <button id="raffleBtn" onclick="openRaffleConfirm()">Sortear</button>
@@ -178,7 +192,6 @@
         <div class="modal-content raffle-result-modal">
             <span class="modal-close" onclick="closeRaffleResult()">&times;</span>
             <div class="modal-body">
-                <div class="raffle-trophy">🏆</div>
                 <h2 class="raffle-result-title">Número Sorteado!</h2>
 
                 <div class="raffle-drum" id="raffleDrum">
@@ -186,7 +199,7 @@
                 </div>
 
                 <div id="raffleWinnerCard" class="raffle-winner-card" style="display:none;">
-                    <h3 class="raffle-section-title">🎉 Vencedor</h3>
+                    <h3 class="raffle-section-title">Vencedor</h3>
                     <div class="raffle-info-row">
                         <span class="raffle-info-label">Número:</span>
                         <span class="raffle-info-value" id="raffleWinnerNumber"></span>
@@ -206,7 +219,7 @@
 
                     <div class="raffle-divider"></div>
 
-                    <h3 class="raffle-section-title">🥇 Maior Vendedor</h3>
+                    <h3 class="raffle-section-title">Maior Vendedor</h3>
                     <div class="raffle-info-row">
                         <span class="raffle-info-label">Nome:</span>
                         <span class="raffle-info-value" id="raffleTopSellerName"></span>
@@ -266,7 +279,6 @@
         <div class="modal-content confirmation-modal">
             <span class="modal-close" onclick="closeConfirmationModal()">&times;</span>
             <div class="modal-body">
-                <div class="success-icon">✓</div>
                 <h2 class="confirmation-title">Venda Registrada!</h2>
                 <p class="confirmation-subtitle">Agora é só realizar o pagamento</p>
                 
@@ -310,7 +322,7 @@
         <div class="modal-content adm-login-content">
             <span class="modal-close" id="admLoginClose">&times;</span>
             <div class="modal-body">
-                <h2 class="adm-login-title">🔐 Área Administrativa</h2>
+                <h2 class="adm-login-title">Área Administrativa</h2>
                 <p class="adm-login-desc">Digite a senha para acessar o painel de administração.</p>
                 <div class="form-group">
                     <label for="admPassword">Senha</label>
@@ -326,17 +338,48 @@
     <div id="admPanelModal" class="modal">
         <div class="modal-content adm-panel-content">
             <div class="adm-panel-header">
-                <h2 class="adm-panel-title">⚙️ Painel ADM</h2>
+                <h2 class="adm-panel-title">Painel ADM</h2>
                 <span class="modal-close" id="admPanelClose">&times;</span>
             </div>
             <div class="modal-body adm-panel-body">
+                <section class="adm-settings-section">
+                    <h3>Informações da rifa</h3>
+                    <p class="adm-settings-notice">Salvo neste navegador. Para publicar as alterações para todos os visitantes, é necessário configurar a sincronização no servidor.</p>
+                    <form id="admSettingsForm">
+                        <div class="form-group">
+                            <label for="admRaffleName">Nome da rifa</label>
+                            <input type="text" id="admRaffleName" maxlength="120" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="admRaffleDate">Data do sorteio</label>
+                            <input type="text" id="admRaffleDate" maxlength="80" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="admPricePerNumber">Preço por número (R$)</label>
+                            <input type="number" id="admPricePerNumber" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="admGoalAmount">Meta da arrecadação (R$)</label>
+                            <input type="number" id="admGoalAmount" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="admPixKey">Chave PIX</label>
+                            <input type="text" id="admPixKey" maxlength="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="admPrizes">Prêmios (um por linha: posição | descrição)</label>
+                            <textarea id="admPrizes" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="reserve-btn">Salvar informações</button>
+                    </form>
+                </section>
                 <div class="adm-summary" id="admSummary"></div>
                 <div class="adm-search-row">
                     <input type="text" id="admSearch" placeholder="Buscar por número, comprador ou vendedor…">
                 </div>
                 <div id="admSalesList"></div>
                 <div class="adm-danger-zone">
-                    <button id="admClearAllBtn" class="adm-btn-clear-all">🗑️ Zerar tudo</button>
+                    <button id="admClearAllBtn" class="adm-btn-clear-all">Zerar tudo</button>
                 </div>
             </div>
         </div>
@@ -347,7 +390,7 @@
         <div class="modal-content adm-edit-content">
             <span class="modal-close" id="admEditClose">&times;</span>
             <div class="modal-body">
-                <h2 class="adm-edit-title">✏️ Editar Venda</h2>
+                <h2 class="adm-edit-title">Editar venda</h2>
                 <input type="hidden" id="editNumberKey">
                 <div class="form-group">
                     <label for="editBuyer">Comprador</label>
