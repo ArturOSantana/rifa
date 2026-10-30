@@ -13,6 +13,17 @@ let PRICE_PER_NUMBER;
 let allNumbers = [];
 let currentFilter = 'all';
 
+function postToAppsScript(data) {
+    return fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify(data)
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });
@@ -790,51 +801,32 @@ async function saveReservation(reservation) {
             seller: reservation.seller
         });
         
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain',
-            },
-            body: JSON.stringify({
-                numbers: reservation.numbers,
-                buyer: reservation.buyer,
-                buyerPhone: reservation.buyerPhone,
-                seller: reservation.seller,
-                price: PRICE_PER_NUMBER
-            })
+        const response = await postToAppsScript({
+            numbers: reservation.numbers,
+            buyer: reservation.buyer,
+            buyerPhone: reservation.buyerPhone,
+            seller: reservation.seller,
+            price: PRICE_PER_NUMBER
         });
         
         document.body.removeChild(loadingDiv);
         
-        const result = await response.text();
-        console.log('Resposta do servidor:', result);
-        
-        if (response.ok) {
+        if (response.type === 'opaque') {
+            console.warn('O navegador enviou a solicitação, mas não pode confirmar a gravação no Apps Script por CORS.');
+        } else if (response.ok) {
+            const result = await response.text();
+            console.log('Resposta do servidor:', result);
             console.log('Dados salvos com sucesso na planilha.');
-            
-            reservation.numbers.forEach(num => {
-                const numberData = allNumbers.find(n => n.number === num);
-                if (numberData) {
-                    numberData.status = 'sold';
-                    numberData.buyer = reservation.buyer;
-                    numberData.buyerPhone = reservation.buyerPhone;
-                    numberData.seller = reservation.seller;
-                    numberData.price = PRICE_PER_NUMBER;
-                }
-            });
-            
-            saveReservationLocally(reservation);
-            
-            renderNumbers();
-            updateStats();
-            
-            setTimeout(() => {
-                console.log('Recarregando dados da planilha...');
-                loadNumbersFromSheet();
-            }, 3000);
         } else {
-            throw new Error('Erro ao salvar: ' + result);
+            throw new Error(`Erro ao salvar: HTTP ${response.status}`);
         }
+
+        saveReservationLocally(reservation);
+
+        setTimeout(() => {
+            console.log('Recarregando dados da planilha...');
+            loadNumbersFromSheet();
+        }, 3000);
         
     } catch (error) {
         console.error('Erro ao salvar reserva:', error);
@@ -1289,11 +1281,7 @@ function removeLocalReservation(number) {
 async function syncEditToSheet(number, buyer, buyerPhone, seller) {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
     try {
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'edit', number, buyer, buyerPhone, seller })
-        });
+        await postToAppsScript({ action: 'edit', number, buyer, buyerPhone, seller });
     } catch (e) {
         console.warn('Não foi possível sincronizar edição com a planilha:', e);
     }
@@ -1302,11 +1290,7 @@ async function syncEditToSheet(number, buyer, buyerPhone, seller) {
 async function syncDeleteToSheet(number) {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
     try {
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'delete', number })
-        });
+        await postToAppsScript({ action: 'delete', number });
     } catch (e) {
         console.warn('Não foi possível sincronizar exclusão com a planilha:', e);
     }
@@ -1350,11 +1334,7 @@ function admClearAll() {
 async function syncClearAllToSheet() {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT_AQUI') return;
     try {
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'clearAll' })
-        });
+        await postToAppsScript({ action: 'clearAll' });
     } catch (e) {
         console.warn('Não foi possível sincronizar limpeza total com a planilha:', e);
     }

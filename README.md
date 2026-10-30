@@ -22,6 +22,10 @@ cp config.example.js config.js
 
 > Não publique nem envie o `config.js` ao repositório. Sem ele, o JavaScript do site não é inicializado e os botões não funcionam.
 
+### Integração com Apps Script e CORS
+
+Os envios para o Apps Script usam uma requisição `no-cors`, necessária para que um site estático em outro domínio consiga enviar os dados sem bloquear a chamada por CORS. Nesse modo, o navegador não expõe a resposta do Apps Script: a interface não consegue confirmar se o servidor gravou os dados. Confira a planilha após registrar uma venda. Se os dados não aparecerem, confirme que a implantação do Apps Script está ativa como **Aplicativo da Web**, executa como você e permite acesso a **Qualquer pessoa**; consulte também o histórico de execuções do Apps Script.
+
 ### Publicação pelo GitHub Actions
 
 O workflow de publicação usa variáveis de repositório em **Settings > Secrets and variables > Actions > Variables**. Configure `PRIZES_JSON` como um array JSON válido, sem o nome da propriedade `PRIZES:`. Por exemplo:
